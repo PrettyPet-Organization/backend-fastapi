@@ -4,7 +4,8 @@ from typing import Any, Dict
 
 def to_camel_case(snake_str: str) -> str:
     components = snake_str.split('_')
-    return components[0] + ''.join(word.capitalize() for word in components[1:])
+    return components[0] + ''.join(word.capitalize()
+                                   for word in components[1:])
 
 
 class CamelCaseModel(BaseModel):
