@@ -1,0 +1,25 @@
+services:
+  backend-fastapi-postgres:
+    image: postgres:17.5
+    environment:
+      POSTGRES_DB: ${PG_DATABASE_NAME}
+      POSTGRES_USER: ${PG_USER_NAME}
+      POSTGRES_PASSWORD: ${PG_USER_PASSWORD}
+    ports:
+      - "${PG_EXTERNAL_PORT}:${PG_INTERNAL_PORT}"
+    volumes:
+      - "/backend_fastapi_postgres_data:/var/lib/postgresql/data"
+    
+  backend-fastapi:
+    env_file:
+      - .env
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    command: 
+      sh -c "make run"
+    volumes:
+      - ./src:/backend-fastapi/src
+      - ./Makefile:/backend-fastapi/Makefile
+      - ./pyproject.toml:/backend-fastapi/pyproject.toml
