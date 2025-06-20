@@ -28,7 +28,7 @@ typecheck-pyright:
 	uv run --no-sync pyright
 
 format-code:
-	uv run autoflake .
+	uv run --no-sync autoflake .
 	uv run --no-sync ruff check --fix --show-fixes
 	-uv run --no-sync ruff format --diff
 	uv run --no-sync ruff format

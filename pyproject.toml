@@ -48,6 +48,8 @@ ignore = [
 
     "D203",  # 1 blank line required before class docstring
     "D213",  # Multi-line docstring summary should start at the second line
+
+    "E501",  # Line too long. Need to be ignored for autofix to work
 ]
 
 isort.split-on-trailing-comma = true
