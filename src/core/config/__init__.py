@@ -1,10 +1,7 @@
 import os
 
 import sqlalchemy
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from str2bool import str2bool_exc
 
 from core.config.db import DatabaseSettings

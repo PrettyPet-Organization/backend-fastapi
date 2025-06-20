@@ -52,9 +52,10 @@ ignore = [
     "E501",  # Line too long. Need to be ignored for autofix to work
 ]
 
-isort.split-on-trailing-comma = true
+isort.split-on-trailing-comma = false
 isort.lines-after-imports = 2
 isort.force-wrap-aliases  = true
+isort.combine-as-imports = true
 
 flake8-tidy-imports.banned-api."typing.Optional".msg = "Use Union Type Expression. X | Y. See more https://docs.python.org/3/library/stdtypes.html#types-union"
 flake8-tidy-imports.banned-api."typing.List".msg = "Use list instead of typing.List (deprecated in Python 3.9)."
