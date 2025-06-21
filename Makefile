@@ -1,8 +1,7 @@
 .PHONY: \
 install-base \
 install-full \
-typecheck-mypy \
-typecheck-pyright \
+typecheck-basedpyright \
 format-code \
 run \
 makemigrations \
@@ -21,11 +20,8 @@ install-base:
 install-full:
 	uv sync --all-groups
 
-typecheck-mypy:
-	uv run --no-sync mypy .
-
-typecheck-pyright:
-	uv run --no-sync pyright
+typecheck-basedpyright:
+	uv run --no-sync basedpyright
 
 format-code:
 	uv run --no-sync autoflake .

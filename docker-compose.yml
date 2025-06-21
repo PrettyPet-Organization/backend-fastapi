@@ -1,6 +1,8 @@
 services:
   backend-fastapi-postgres:
     image: postgres:17.5
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: ${PG_DATABASE_NAME}
       POSTGRES_USER: ${PG_USER_NAME}
@@ -8,7 +10,7 @@ services:
     ports:
       - "${PG_EXTERNAL_PORT}:${PG_INTERNAL_PORT}"
     volumes:
-      - "/backend_fastapi_postgres_data:/var/lib/postgresql/data"
+      - postgres_data:/var/lib/postgresql/data
     
   backend-fastapi:
     env_file:
@@ -23,3 +25,6 @@ services:
       - ./src:/backend-fastapi/src
       - ./Makefile:/backend-fastapi/Makefile
       - ./pyproject.toml:/backend-fastapi/pyproject.toml
+
+volumes:
+  postgres_data:

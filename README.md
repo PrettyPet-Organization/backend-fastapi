@@ -13,7 +13,12 @@
 2. **Rename the [`.env.template`](.env.template) file to `.env`**, configure it
 
 3. **Run**
-
+   easy way
+   ```bash
+   DOTENV_MODE=true uvicorn main:app
+   ```
+   from root dir
+   
    **If you use `uv`:**
     ```bash
     make docker-run

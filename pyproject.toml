@@ -7,6 +7,7 @@ dependencies = [
     "fastapi>=0.115.12",
     "psycopg[binary]>=3.2.9",
     "pydantic-settings>=2.9.1",
+    "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.41",
     "str2bool>=1.1",
     "uvicorn>=0.34.3",
@@ -16,27 +17,72 @@ dependencies = [
 [dependency-groups]
 dev = [
     "autoflake>=2.3.1",
-    "mypy>=1.16.1",
-    "pyright>=1.1.402",
+    "basedpyright>=1.29.4",
     "ruff>=0.11.13",
 ]
 
 
 [tool.ruff]
-unsafe-fixes = true
+fix = true
+unsafe-fixes = false
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+skip-magic-trailing-comma = true
+indent-style = "space"
+line-ending = "auto"
 
 
 [tool.ruff.lint]
 select = [
-    "D",  # pydocstyle
-    "E",  # pycodestyle
-    "F",  # pyflakes
-    "I",  # isort
-    "N",  # pep8-naming
-    "TID",  # flake8-tidy-imports
-    "W",  # warning
+    "ERA",
+    "FAST",
+    "ANN",
+    "S",
+    "B",
+    "BLE",
+    "FBT",
+    "A",
+    "COM",
+    "C4",
+    "DTZ",
+    "EM",
+    "ISC",
+    "ICN",
+    "LOG",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "SLOT",
+    "TID",
+    "TD",
+    "TC",
+    "ARG",
+    "PTH",
+    "FLY",
+    "I",
+    "N",
+    "PERF",
+    "E",
+    "W",
+    "D",
+    "F",
+    "UP",
+    "FURB",
+    "TRY",
 ]
 ignore = [
+    "PT011", # Checks for pytest.raises calls without a match parameter.
+
+    "UP038", # Deprecated
+
     "D10",
     # - Missing docstring in public module
     # - Missing docstring in public class
@@ -50,14 +96,16 @@ ignore = [
     "D213",  # Multi-line docstring summary should start at the second line
 
     "E501",  # Line too long. Need to be ignored for autofix to work
+
+    "COM812",
 ]
 
 isort.split-on-trailing-comma = false
 isort.lines-after-imports = 2
-isort.force-wrap-aliases  = true
+isort.force-wrap-aliases  = false
 isort.combine-as-imports = true
 
-flake8-tidy-imports.banned-api."typing.Optional".msg = "Use Union Type Expression. X | Y. See more https://docs.python.org/3/library/stdtypes.html#types-union"
+flake8-tidy-imports.banned-api."typing.Optional".msg = "Recomended use X | None instead of Optional. Read PEP604"
 flake8-tidy-imports.banned-api."typing.List".msg = "Use list instead of typing.List (deprecated in Python 3.9)."
 flake8-tidy-imports.banned-api."typing.Dict".msg = "Use dict instead of typing.Dict (deprecated in Python 3.9)."
 flake8-tidy-imports.banned-api."typing.Tuple".msg = "Use tuple instead of typing.Tuple (deprecated in Python 3.9)."
@@ -92,13 +140,9 @@ recursive = true
 remove_all_unused_imports = true
 
 
-[tool.pyright]
+[tool.basedpyright]
 typeCheckingMode = "strict"
-reportMissingTypeStubs = false
-
-
-[tool.mypy]
-mypy_path = "src"
-explicit_package_bases = true
-ignore_missing_imports = true
-strict = true
+analyzeUnannotatedFunctions = true
+reportMissingTypeStubs = true
+reportGeneralTypeIssues = true
+reportMissingParameterType = true
