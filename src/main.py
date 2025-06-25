@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from core.config import settings
 from core.routing import router as core_router
-
+from fastapi.openapi.utils import get_openapi
 
 app = FastAPI(debug=settings.debug, title="PrettyPet API")
 app.include_router(core_router)

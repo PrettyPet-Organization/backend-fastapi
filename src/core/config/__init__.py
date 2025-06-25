@@ -1,5 +1,6 @@
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 import sqlalchemy
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from str2bool import str2bool_exc
