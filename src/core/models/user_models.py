@@ -1,49 +1,21 @@
-from .base import (
-    Base,
-    CreatedAtMixin,
-    UpdatedAtMixin,
-    get_str_field
-)
-from sqlalchemy.orm import (
-    DeclarativeBase,
-    Mapped,
-    relationship,
-    MappedColumn,
-    mapped_column
-)
-from sqlalchemy import (
-    ForeignKey,
-    Table,
-    Column
-)
-from fastapi import Depends
-from typing import (
-    Annotated,
-    List
-)
-from .secondary_tables import project_role_skills
+from typing import Annotated
 
+from fastapi import Depends
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base, CreatedAtMixin, UpdatedAtMixin, get_str_field
+from .secondary_tables import project_role_skills, project_role_users, user_skills
 
 
 class OauthAccountsBase(Base):
     __tablename__ = "oauth_accounts"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique = True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     provider: Mapped[Annotated[str, Depends(get_str_field)]]
     provider_user_id: Mapped[Annotated[str, Depends(get_str_field)]]
 
-    user: Mapped["UsersBase"] =  relationship(back_populates = "oauth_account")
-
-
-
-class UserSkillsBase(Base):
-    __tablename__ = "user_skills"
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"))    
-
-    user: Mapped["UsersBase"] = relationship(back_populates = "user_skills")
-    skills: Mapped["SkillsBase"] = relationship(back_populates = "skill")
+    user: Mapped["UsersBase"] = relationship(back_populates="oauth_account")
 
 
 class SkillsBase(Base):
@@ -51,8 +23,12 @@ class SkillsBase(Base):
 
     name: Mapped[Annotated[str, Depends(get_str_field)]]
 
-    users: Mapped[List["UserSkillsBase"]] = relationship("skill")
-    project_roles: Mapped[List["ProjectRolesBase"]] = relationship("skills")
+    users: Mapped[list["UsersBase"]] = relationship(
+        secondary="user_skills", back_populates="skills"
+    )
+    roles: Mapped[list["ProjectRolesBase"]] = relationship(
+        secondary=project_role_skills, back_populates="skills"
+    )
 
 
 class ProjectRolesBase(Base):
@@ -64,17 +40,17 @@ class ProjectRolesBase(Base):
     required_skills_description: Mapped[str]
     number_of_needed: Mapped[int]
 
-    skills: Mapped[List["SkillsBase"]] = relationship(secondary = project_role_skills)
-    role_types: Mapped["RoleTypesBase"] = relationship(back_populates = "project_roles")
-    project: Mapped["ProjectBase"] = relationship(back_populates = "roles")
-    project_users_roles: Mapped[List["ProjectRoleUsersBase"]] = relationship(back_populates = "project_role") 
+    skills: Mapped[list["SkillsBase"]] = relationship(
+        secondary=project_role_skills, back_populates="project_roles"
+    )
+    role_types: Mapped["RoleTypesBase"] = relationship(back_populates="project_roles")
+    project: Mapped["ProjectBase"] = relationship(back_populates="roles")
+    users: Mapped[list["UsersBase"]] = relationship(
+        secondary=project_role_users, back_populates="project_roles"
+    )
 
 
-class ProjectBase(
-    Base,
-    CreatedAtMixin,
-    UpdatedAtMixin
-):
+class ProjectBase(Base, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "projects"
 
     title: Mapped[Annotated[str, Depends(get_str_field)]]
@@ -83,9 +59,8 @@ class ProjectBase(
     entry_ticket_price: Mapped[int]
     creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    creator: Mapped["UsersBase"] = relationship(back_populates = "project")
-    roles: Mapped[List["ProjectRolesBase"]] = relationship(back_populates = "project")
-
+    creator: Mapped["UsersBase"] = relationship(back_populates="project")
+    roles: Mapped[list["ProjectRolesBase"]] = relationship(back_populates="project")
 
 
 class RoleTypesBase(Base):
@@ -93,14 +68,12 @@ class RoleTypesBase(Base):
 
     name: Mapped[Annotated[str, Depends(get_str_field)]]
 
-    project_roles: Mapped[List["ProjectRolesBase"]] = relationship(back_populates = "role_type")
+    project_roles: Mapped[list["ProjectRolesBase"]] = relationship(
+        back_populates="role_type"
+    )
 
 
-class UsersBase(
-    Base,
-    CreatedAtMixin,
-    UpdatedAtMixin
-):
+class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "users"
 
     email: Mapped[Annotated[str, Depends(get_str_field)]]
@@ -111,11 +84,15 @@ class UsersBase(
     experience: Mapped[str]
     level_id: Mapped[int] = mapped_column(ForeignKey("levels.id"))
 
-    level: Mapped["LevelsBase"] = relationship(back_populates = "users")
-    oauth_account: Mapped["OauthAccountsBase"] = relationship(back_populates = "user")
-    skills: Mapped[List["UserSkillsBase"]] = relationship(back_populates = "user")
-    projects: Mapped[List["ProjectBase"]] = relationship(back_populates = "creator")
-    project_roles: Mapped[List["ProjectRolesBase"]] = relationship(back_populates = "user")
+    oauth_account: Mapped["OauthAccountsBase"] = relationship(back_populates="user")
+    skills: Mapped[list["SkillsBase"]] = relationship(
+        secondary=user_skills, back_populates="users"
+    )
+    level: Mapped["LevelsBase"] = relationship(back_populates="users")
+    projects: Mapped[list["ProjectBase"]] = relationship(back_populates="creator")
+    roles: Mapped[list["ProjectRolesBase"]] = relationship(
+        secondary=project_role_users, back_populates="users"
+    )
 
 
 class LevelsBase(Base):
@@ -123,18 +100,4 @@ class LevelsBase(Base):
 
     name: Mapped[Annotated[str, Depends(get_str_field)]]
 
-    users: Mapped[List["UsersBase"]] = relationship(back_populates = "level")
-
-
-class ProjectRoleUsersBase(
-    Base,
-    CreatedAtMixin
-):
-    __tablename__ = "project_role_users"
-
-    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
-    project_roles: Mapped["ProjectRolesBase"] = relationship(back_populates = "project_role_user")
-    user: Mapped["UsersBase"] = relationship(back_populates = "project_role_user")
-
+    users: Mapped[list["UsersBase"]] = relationship(back_populates="level")
