@@ -21,6 +21,6 @@ project_role_users = Table(
     "project_role_users",
     Base.metadata,
     Column("project_role_id", ForeignKey("project_roles.id")),
-    Column("users_id", ForeignKey("users.ids")),
+    Column("users_id", ForeignKey("users.id")),
     Column("created_at", DateTime, server_default=func.now()),
 )
