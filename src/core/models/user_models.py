@@ -1,11 +1,11 @@
+from decimal import Decimal
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, CreatedAtMixin, UpdatedAtMixin, get_str_field
-from .secondary_tables import project_role_skills, project_role_users, user_skills
 
 
 class OauthAccountsBase(Base):
@@ -27,7 +27,7 @@ class SkillsBase(Base):
         secondary="user_skills", back_populates="skills"
     )
     roles: Mapped[list["ProjectRolesBase"]] = relationship(
-        secondary=project_role_skills, back_populates="skills"
+        secondary="project_role_skills", back_populates="skills"
     )
 
 
@@ -41,12 +41,12 @@ class ProjectRolesBase(Base):
     number_of_needed: Mapped[int]
 
     skills: Mapped[list["SkillsBase"]] = relationship(
-        secondary=project_role_skills, back_populates="project_roles"
+        secondary="project_role_skills", back_populates="project_roles"
     )
     role_types: Mapped["RoleTypesBase"] = relationship(back_populates="project_roles")
     project: Mapped["ProjectBase"] = relationship(back_populates="roles")
     users: Mapped[list["UsersBase"]] = relationship(
-        secondary=project_role_users, back_populates="project_roles"
+        secondary="project_role_users", back_populates="project_roles"
     )
 
 
@@ -55,8 +55,8 @@ class ProjectBase(Base, CreatedAtMixin, UpdatedAtMixin):
 
     title: Mapped[Annotated[str, Depends(get_str_field)]]
     description: Mapped[str]
-    desired_fundraising_amount: Mapped[int]
-    entry_ticket_price: Mapped[int]
+    desired_fundraising_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    entry_ticket_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     creator: Mapped["UsersBase"] = relationship(back_populates="project")
@@ -86,12 +86,12 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
 
     oauth_account: Mapped["OauthAccountsBase"] = relationship(back_populates="user")
     skills: Mapped[list["SkillsBase"]] = relationship(
-        secondary=user_skills, back_populates="users"
+        secondary="user_skills", back_populates="users"
     )
     level: Mapped["LevelsBase"] = relationship(back_populates="users")
     projects: Mapped[list["ProjectBase"]] = relationship(back_populates="creator")
     roles: Mapped[list["ProjectRolesBase"]] = relationship(
-        secondary=project_role_users, back_populates="users"
+        secondary="project_role_users", back_populates="users"
     )
 
 
@@ -101,3 +101,24 @@ class LevelsBase(Base):
     name: Mapped[Annotated[str, Depends(get_str_field)]]
 
     users: Mapped[list["UsersBase"]] = relationship(back_populates="level")
+
+
+class ProjectRoleSkillsAssociation(Base):
+    __tablename__ = "project_role_skills"
+
+    role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"))
+    skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"))
+
+
+class UserSkillsAssociation(Base):
+    __tablename__ = "user_skills"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"))
+
+
+class ProjectRoleUsersAssociation(Base, CreatedAtMixin):
+    __tablename__ = "project_role_users"
+
+    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"))
+    users_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

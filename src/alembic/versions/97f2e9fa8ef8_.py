@@ -1,6 +1,6 @@
-"""Revision ID: 5f7f061afd14
+"""Revision ID: 97f2e9fa8ef8
 Revises: 
-Create Date: 2025-06-29 01:47:50.020333
+Create Date: 2025-07-01 03:19:11.062014
 
 """
 from collections.abc import Sequence
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision: str = "5f7f061afd14"
+revision: str = "97f2e9fa8ef8"
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -61,8 +61,8 @@ def upgrade() -> None:
     op.create_table("projects",
     sa.Column("title", sa.String(), nullable=False),
     sa.Column("description", sa.String(), nullable=False),
-    sa.Column("desired_fundraising_amount", sa.Integer(), nullable=False),
-    sa.Column("entry_ticket_price", sa.Integer(), nullable=False),
+    sa.Column("desired_fundraising_amount", sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column("entry_ticket_price", sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column("creator_id", sa.Integer(), nullable=False),
     sa.Column("id", sa.Integer(), nullable=False),
     sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
@@ -71,10 +71,12 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint("id")
     )
     op.create_table("user_skills",
-    sa.Column("user_id", sa.Integer(), nullable=True),
-    sa.Column("skill_id", sa.Integer(), nullable=True),
+    sa.Column("user_id", sa.Integer(), nullable=False),
+    sa.Column("skill_id", sa.Integer(), nullable=False),
+    sa.Column("id", sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(["skill_id"], ["skills.id"] ),
-    sa.ForeignKeyConstraint(["user_id"], ["users.id"] )
+    sa.ForeignKeyConstraint(["user_id"], ["users.id"] ),
+    sa.PrimaryKeyConstraint("id")
     )
     op.create_table("project_roles",
     sa.Column("role_type_id", sa.Integer(), nullable=False),
@@ -88,17 +90,21 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint("id")
     )
     op.create_table("project_role_skills",
-    sa.Column("role_id", sa.Integer(), nullable=True),
-    sa.Column("skill_id", sa.Integer(), nullable=True),
+    sa.Column("role_id", sa.Integer(), nullable=False),
+    sa.Column("skill_id", sa.Integer(), nullable=False),
+    sa.Column("id", sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(["role_id"], ["project_roles.id"] ),
-    sa.ForeignKeyConstraint(["skill_id"], ["skills.id"] )
+    sa.ForeignKeyConstraint(["skill_id"], ["skills.id"] ),
+    sa.PrimaryKeyConstraint("id")
     )
     op.create_table("project_role_users",
-    sa.Column("project_role_id", sa.Integer(), nullable=True),
-    sa.Column("users_id", sa.Integer(), nullable=True),
-    sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+    sa.Column("project_role_id", sa.Integer(), nullable=False),
+    sa.Column("users_id", sa.Integer(), nullable=False),
+    sa.Column("id", sa.Integer(), nullable=False),
+    sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
     sa.ForeignKeyConstraint(["project_role_id"], ["project_roles.id"] ),
-    sa.ForeignKeyConstraint(["users_id"], ["users.id"] )
+    sa.ForeignKeyConstraint(["users_id"], ["users.id"] ),
+    sa.PrimaryKeyConstraint("id")
     )
     # ### end Alembic commands ###
 
