@@ -6,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, MappedColumn, mapped_column
 
 
 class IntPkMixin:
-    id: Mapped[Annotated[int, mapped_column(primary_key=True)]]
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 class CreatedAtMixin:
@@ -19,6 +19,9 @@ class UpdatedAtMixin:
             datetime, mapped_column(server_default=func.now(), onupdate=func.now())
         ]
     ]
+
+class AssignedAtMixin:
+    assigned_at: Mapped[Annotated[datetime, mapped_column(server_default=func.now())]]
 
 
 class Base(DeclarativeBase, IntPkMixin):

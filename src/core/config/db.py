@@ -20,7 +20,7 @@ class DatabaseSettings(BaseSettings):
         super().__init__(**values)
         if not self.url:
             self.url = sqlalchemy.engine.URL.create(
-                drivername="postgresql+asyncpg",
+                drivername="postgresql+psycopg",
                 username=self.PG_USER_NAME,
                 password=self.PG_USER_PASSWORD,
                 host=self.PG_INTERNAL_HOST,

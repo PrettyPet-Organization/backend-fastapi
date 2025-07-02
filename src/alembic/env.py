@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from src.core.config.db import DatabaseSettings
-from src.core.models import secondary_tables, user_models  # noqa
+from src.core.models import user_models  # noqa
 from src.core.models.base import Base
 
 
@@ -19,7 +19,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", str(db_config.url) + "?async_fallback=True")
+
+config.set_main_option("sqlalchemy.url", db_config.url.render_as_string(hide_password=False) + "?async_fallback=True")
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
