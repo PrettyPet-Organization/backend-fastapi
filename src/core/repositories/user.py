@@ -1,7 +1,9 @@
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.models.user import User
 from core.utils.security import hash_password
-from sqlalchemy import select
+
 
 class UserRepository:
     def __init__(self, session: AsyncSession):

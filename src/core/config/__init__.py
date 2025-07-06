@@ -1,14 +1,17 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
+from collections.abc import AsyncGenerator
+
 import sqlalchemy
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from str2bool import str2bool_exc
 
 from core.config.db import DatabaseSettings
 from core.config.logging import LOGGING_CONFIG, logger
 from core.config.main import BASE_DIR, Settings
 
+
+load_dotenv()
 
 DOTENV_MODE = str2bool_exc(os.getenv("DOTENV_MODE", "false"))
 
@@ -42,6 +45,10 @@ settings = Settings(debug=DEBUG, db=db_settings)
 
 async_db_engine = create_async_engine(settings.db.url, echo=settings.db.echo)
 async_db_session_factory = async_sessionmaker(async_db_engine)
+
+async def get_db() -> AsyncGenerator[AsyncSession]:
+    async with async_db_session_factory() as session:
+        yield session
 
 __all__ = (
     "settings",

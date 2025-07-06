@@ -1,8 +1,10 @@
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from pydantic_settings import BaseSettings
 import sqlalchemy
+from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+
+load_dotenv()
 
 class DatabaseSettings(BaseSettings):
     url: str | sqlalchemy.URL
@@ -17,8 +19,3 @@ db_settings = DatabaseSettings()
 
 engine = create_async_engine(str(db_settings.url), echo=db_settings.echo)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
-
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session() as session:
-        yield session
