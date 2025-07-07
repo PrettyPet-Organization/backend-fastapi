@@ -2,7 +2,6 @@ import os
 from collections.abc import AsyncGenerator
 
 import sqlalchemy
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from str2bool import str2bool_exc
 
@@ -10,8 +9,6 @@ from core.config.db import DatabaseSettings
 from core.config.logging import LOGGING_CONFIG, logger
 from core.config.main import BASE_DIR, Settings
 
-
-load_dotenv()
 
 DOTENV_MODE = str2bool_exc(os.getenv("DOTENV_MODE", "false"))
 
