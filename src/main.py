@@ -20,7 +20,7 @@ async def main() -> None:
         "main:app",
         host="0.0.0.0",  # noqa: S104
         reload=settings.debug,
-        log_config=LOGGING_CONFIG
+        log_config=LOGGING_CONFIG,
     )
 
 

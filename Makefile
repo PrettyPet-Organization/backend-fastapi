@@ -33,10 +33,10 @@ run:
 	uv run --no-sync src/main.py
 
 makemigrations:
-	cd src && uv run alembic revision --autogenerate -m "${msg}"
+	uv run alembic -c src/alembic.ini revision --autogenerate -m "${msg}"
 
 migrate:
-	cd src && uv run alembic upgrade head
+	uv run alembic -c src/alembic.ini upgrade head
 
 docker-run:
 	docker compose up -d
