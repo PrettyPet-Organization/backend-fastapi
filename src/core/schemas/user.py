@@ -1,19 +1,20 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import ConfigDict, EmailStr
+
+from core.schemas.base import CamelBaseModel
 
 
-class UserCreate(BaseModel):
+class UserCreate(CamelBaseModel):
     email: EmailStr
     password: str
 
 
-class UserRead(BaseModel):
+class UserRead(CamelBaseModel):
     id: int
     email: EmailStr
     is_active: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
-class UserLogin(BaseModel):
+class UserLogin(CamelBaseModel):
     email: EmailStr
     password: str
