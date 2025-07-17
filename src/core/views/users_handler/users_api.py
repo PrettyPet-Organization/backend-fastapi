@@ -33,7 +33,7 @@ from src.core.schemas.user_patterns import (
 users_router = APIRouter()
 
 
-@users_router.get("/api/v1/users/{users_id}", status_code = 200, include_in_schema = UserDataPublicTemplate)
+@users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserDataPublicTemplate)
 async def get_user(
     users_id: int,
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -60,7 +60,7 @@ async def get_user(
         )
     
 
-@users_router.put("/api/v1/users/{user_id}", status_code = 201, include_in_schema = UserDataPublicTemplate)
+@users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserDataPublicTemplate)
 async def update_user(
     user_id: int,
     data_to_update: UserDataPublicTemplate,
@@ -76,16 +76,16 @@ async def update_user(
             UsersBase.id == user_id
         )
         .values(
-            **data_to_update.to_dict()
+            **(data_to_update.model_dump())
         )
     )
     user_data = await db.execute(stmt)
-    db.commit()
+    await db.commit()
 
     return data_to_update
 
 
-@users_router.get("/api/v1/users/{user_id}/skills", include_in_schema = list[SkillsVitalTemplate])
+@users_router.get("/api/v1/users/{user_id}/skills", response_model = list[SkillsVitalTemplate])
 async def get_skills(
     user_id: int,
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -131,11 +131,11 @@ async def add_skill(
         raise HTTPException(detail = "There is no skill with such id in the database", status_code = 400)
     
     await db.add(skill_add)
-    db.commit()
+    await db.commit()
 
     response = {
         "message": "skill added successfully",
-        "skill": SkillsVitalTemplate(skill_to_add).to_dict()
+        "skill": SkillsVitalTemplate(skill_to_add).model_dump()
     }
     return JSONResponse(
         content = response,
@@ -162,7 +162,7 @@ async def delete_skill(
     )    
 
     await db.execute(stmt)
-    db.commit()
+    await db.commit()
 
     return JSONResponse(
         content = {},
