@@ -1,6 +1,8 @@
 services:
   backend-fastapi-postgres:
-    image: postgres:17.5
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
     env_file:
       - .env
     environment:
@@ -11,6 +13,7 @@ services:
       - "${PG_EXTERNAL_PORT}:${PG_INTERNAL_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups:z
     
   backend-fastapi:
     env_file:

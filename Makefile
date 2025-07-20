@@ -58,3 +58,11 @@ docker-logs:
 
 docker-postgres-logs:
 	docker compose logs -f backend-fastapi-postgres
+
+docker-postgres-create-backup:
+	 docker-compose -f docker-compose.yml --env-file .env exec backend-fastapi-postgres backup
+
+docker-postgres-restore:
+	cp ./restore.sql.gz ./backups
+	docker-compose -f docker-compose.yml --env-file .env exec backend-fastapi-postgres restore restore.sql.gz
+	rm ./backups/restore.sql.gz

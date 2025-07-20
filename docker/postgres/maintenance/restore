@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+
+working_dir="$(dirname ${0})"
+source "${working_dir}/constants.sh"
+
+if [[ -z ${1+x} ]]; then
+    backup_filename=$(find "${BACKUP_DIR_PATH}" -maxdepth 1 -type f -name "${BACKUP_FILE_PREFIX}*.sql.gz" | sort -r | head -n 1)
+else
+    backup_filename="${BACKUP_DIR_PATH}/${1}"
+fi
+
+if [[ ! -f "${backup_filename}" ]]; then
+    echo "No backup with the specified filename found: ${backup_filename}."
+    exit 1
+fi
+
+echo "Restoring the '${PG_DATABASE_NAME}' database from the '${backup_filename}' backup..."
+
+if [[ "${PG_USER_NAME}" == "postgres" ]]; then
+    echo "Restoring as 'postgres' user is not supported. Assign 'POSTGRES_USER' env with another one and try again."
+    exit 1
+fi
+
+export PGHOST="${PG_INTERNAL_HOST}"
+export PGPORT="${PG_INTERNAL_PORT}"
+export PGUSER="${PG_USER_NAME}"
+export PGPASSWORD="${PG_USER_PASSWORD}"
+
+if psql -lqt | cut -d \| -f 1 | grep -qw "${PG_DATABASE_NAME}"; then
+  echo "Dropping the database..."
+  dropdb "${PG_DATABASE_NAME}" --force
+fi
+
+echo "Creating a new database..."
+createdb --owner="${PG_USER_NAME}" "${PG_DATABASE_NAME}"
+
+echo "Applying the backup to the new database..."
+pg_restore -j 5 -d "${PG_DATABASE_NAME}" "${backup_filename}"
+
+echo "The '${PG_DATABASE_NAME}' database has been restored from the '${backup_filename}' backup."
