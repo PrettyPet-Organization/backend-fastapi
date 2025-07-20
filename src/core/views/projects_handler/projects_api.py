@@ -125,7 +125,7 @@ async def retreive_project_by_id(
         return response
 
 
-@projects_router.delete("/api/v1/projects/{project_id}")
+@projects_router.delete("/api/v1/projects/{project_id}", status_code = 204)
 async def delete_project(
     project_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -151,10 +151,17 @@ async def delete_project(
         data_on_delete = await db.execute(stmt)
         await db.commit()
         logging.info(data_on_delete)
-        return {}
+        return JSONResponse(
+            content = {},
+            status_code = 204
+        )
+    
     except Exception as e:
         logging.warning(e)
-        raise HTTPException(status_code=500, detail = "something went wrong")
+        raise HTTPException(
+            status_code=500,
+            detail = "something went wrong"
+        )
 
 
 @projects_router.put("/api/v1/projects/{project_id}", status_code = 201, response_model = ProjectTemplate)

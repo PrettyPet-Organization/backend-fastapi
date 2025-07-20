@@ -143,7 +143,7 @@ async def add_skill(
     )
 
 
-@users_router.delete("/api/v1/users/{user_id}/skills/{skill_id}")
+@users_router.delete("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill(
     user_id: int,
     skill_id: int,
@@ -166,6 +166,6 @@ async def delete_skill(
 
     return JSONResponse(
         content = {},
-        status_code = 201
+        status_code = 204
     )
 

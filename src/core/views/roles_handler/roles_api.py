@@ -3,8 +3,12 @@ from fastapi import (
     Depends,
     HTTPException
 )
+from fastapi.responses import (
+    JSONResponse
+)
 from src.core.schemas.project_patterns import (
-    ProjectImputableTemplate
+    ProjectImputableTemplate,
+    RoleInputTemplate
 )
 from src.core.schemas.role_patterns import (
     BasicRoleTemplate,
@@ -31,7 +35,9 @@ from sqlalchemy.orm import (
     joinedload
 )
 from sqlalchemy import (
-    select
+    select,
+    update,
+    delete
 )
 
 
@@ -103,10 +109,11 @@ async def get_project_roles(
     return project_data.roles
 
 
-@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}")
+@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = ...)
 async def change_project_role(
     project_id: int,
     role_id: int,
+    project_role_data: RoleInputTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)]
 ) -> ProjectRolesBase:
@@ -131,8 +138,66 @@ async def change_project_role(
     elif role_info_scalar.project.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to change data here")
 
-    ####
-    
-    
+    stmt = (
+        update(ProjectRolesBase)
+        .values(
+            **(project_role_data.model_dump())
+        )
+        .where(
+            ProjectRolesBase.id == project_id
+        )
+    )
 
-     
+    await db.execute(stmt)
+    await db.commit()
+    
+    await db.refresh(role_info_scalar)
+
+    return role_info_scalar
+
+    
+    
+@roles_router.delete("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 204)
+async def delete_role(
+    project_id: int,
+    role_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user_data: Annotated[UsersBase, Depends(get_current_user)]
+) -> JSONResponse:
+    stmt = (
+        select(
+            ProjectBase
+        )
+        .options(
+            joinedload(ProjectBase.creator)
+        )
+        .where(
+            ProjectBase.id == project_id
+        )
+    )
+
+    project_data = await db.execute(stmt)
+    project_data = project_data.scalar_one_or_none()
+
+    if not project_data:
+        raise HTTPException(detail = "There was no such project in the database", status_code = 404)
+    elif project_data.creator_id != user_data.id:
+        raise HTTPException(status_code = 403, detail = "You are not allowed to change data for someone else's project" )
+
+    stmt = (
+        delete(
+            ProjectRolesBase
+        )
+        .where(
+            ProjectRolesBase.project_id == project_id
+        )
+    )
+
+    await db.execute(stmt)
+    await db.commit()
+
+    return JSONResponse(
+        content = {},
+        status_code = 204
+    )
+    

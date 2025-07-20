@@ -34,3 +34,10 @@ class ExtendedProjectTemplate(
 ):
     roles: list[SkillsVitalTemplate]
     assigned_user: list[UserDataPublicTemplate]
+
+
+
+class RoleInputTemplate(
+    BaseModel
+):
+    id: int
