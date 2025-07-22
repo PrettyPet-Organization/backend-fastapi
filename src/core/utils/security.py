@@ -2,7 +2,7 @@ from passlib.context import CryptContext
 from fastapi import Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.dependencies.auth import get_db, get_current_user
+from core.dependencies.auth import get_db, get_current_user
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

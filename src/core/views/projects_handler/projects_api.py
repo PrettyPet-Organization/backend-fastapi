@@ -5,11 +5,11 @@ from fastapi import (
     Depends,
     Query
 )
-from src.core.dependencies.auth import (
+from core.dependencies.auth import (
     get_db,
     get_current_user
 )
-from src.core.models.user_models import (
+from core.models.user_models import (
     UsersBase,
     SkillsBase,
     UserSkillsAssociation,
@@ -21,12 +21,12 @@ from src.core.models.user_models import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import JSONResponse
 from typing import Annotated
-from src.core.schemas.project_patterns import (
+from core.schemas.project_patterns import (
     ProjectTemplate,
     ProjectImputableTemplate,
     ExtendedProjectTemplate,
 )
-from src.core.schemas.query_handler import (
+from core.schemas.query_handler import (
     ListQueryTemplate
 )
 from sqlalchemy.orm import (
@@ -39,6 +39,7 @@ from sqlalchemy import (
     select,
     or_,
     update,
+    desc,
     func
 )
 
@@ -63,40 +64,69 @@ async def create_project(
 
     return new_project
         
+###
 
-@projects_router.get("/api/v1/projects", status_code = 200, response_model = ...)
+@projects_router.get("/api/v1/projects", status_code = 200, response_model = ExtendedProjectTemplate)
 async def get_projects(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge = 1),
     size: int = Query(10, ge=1, le=100),
     query_filter: str | None = None
 ) -> ProjectBase:
-    stmt = (
-        select(
-            ProjectBase
+    page = page if page else 1
+    size = size if size else 10
+
+    if query_filter:
+        tsvector = (
+            func.to_tsvector('russian', ProjectBase.title + ' ' + ProjectBase.description)
         )
-        .options(
-            selectinload(ProjectBase.roles)
-        )
-        .where(
-            or_(
-                ProjectBase.description.ilike(query_filter),
-                ProjectBase.title.ilike(query_filter)
+        tsquery = func.plainto_tsquery('russian', query_filter)
+
+        rank = func.ts_rank(tsvector, tsquery)
+        stmt = (
+            select(
+                ProjectBase, rank.label("rank")
             )
+            .options(
+                selectinload(ProjectBase.roles)
+            )
+            .where(
+                tsvector.op('@@')(tsquery)
+            )
+            .order_by(
+                desc(rank)
+            )
+            .limit(size)
+            .offset((page - 1) * size)
         )
-        .order_by(
-            ...
+    else:
+        stmt = (
+            select(
+                ProjectBase
+            )
+            .options(
+                selectinload(ProjectBase.roles)
+            )
+            .where(
+                or_(
+                    ProjectBase.description.ilike(query_filter),
+                    ProjectBase.title.ilike(query_filter)
+                )
+            )
+            .order_by(
+                desc(ProjectBase.created_at)
+            )
+            .limit(size)
+            .offset((page - 1) * size)
         )
-        .limit(size)
-        .offset((page - 1) * size)
-    )
+ 
 
     projects_filtered = await db.execute(stmt)
     projects_filtered_scalared = projects_filtered.scalars()
 
     return projects_filtered_scalared
 
-
+###
 
 @projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ExtendedProjectTemplate)
 async def retreive_project_by_id(

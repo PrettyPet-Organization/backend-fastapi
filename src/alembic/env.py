@@ -20,7 +20,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-config.set_main_option("sqlalchemy.url", db_config.url.render_as_string(hide_password=False) + "?async_fallback=True")
+config.set_main_option("sqlalchemy.url", db_config.url.render_as_string(hide_password=False))
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel

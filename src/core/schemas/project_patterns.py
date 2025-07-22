@@ -6,6 +6,7 @@ from .user_patterns import (
     SkillsVitalTemplate
 )
 
+
 class TimeMixin(BaseModel):
     created_at: datetime
     updated_at: datetime    
@@ -41,3 +42,10 @@ class RoleInputTemplate(
     BaseModel
 ):
     id: int
+
+
+class FullProjectTemplate(
+    ExtendedProjectTemplate,
+    BaseModel
+):
+    pass

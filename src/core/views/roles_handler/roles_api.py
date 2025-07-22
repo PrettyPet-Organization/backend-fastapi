@@ -6,20 +6,21 @@ from fastapi import (
 from fastapi.responses import (
     JSONResponse
 )
-from src.core.schemas.project_patterns import (
+from core.schemas.project_patterns import (
     ProjectImputableTemplate,
-    RoleInputTemplate
+    RoleInputTemplate,
+    ExtendedProjectTemplate
 )
-from src.core.schemas.role_patterns import (
+from core.schemas.role_patterns import (
     BasicRoleTemplate,
     CompleteRoleTemplate
 )
 from typing import Annotated
-from src.core.dependencies.auth import (
+from core.dependencies.auth import (
     get_db,
     get_current_user
 )
-from src.core.models.user_models import (
+from core.models.user_models import (
     UsersBase,
     ProjectRolesBase,
     SkillsBase,
@@ -108,8 +109,9 @@ async def get_project_roles(
     
     return project_data.roles
 
+###
 
-@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = ...)
+@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = ExtendedProjectTemplate)
 async def change_project_role(
     project_id: int,
     role_id: int,
@@ -155,7 +157,8 @@ async def change_project_role(
 
     return role_info_scalar
 
-    
+
+###   
     
 @roles_router.delete("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 204)
 async def delete_role(

@@ -48,3 +48,9 @@ def get_str_field(
     ```.
     """
     return mapped_column(String(length=length, collation=collation))
+
+
+def get_str_field_nullable(
+    length: int | None = 256, collation: str | None = None
+):
+    return mapped_column(String(length=length, collation=collation, nullable = True))

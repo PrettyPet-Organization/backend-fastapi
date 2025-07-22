@@ -4,12 +4,12 @@ from fastapi import (
     Depends
 )
 from fastapi.responses import JSONResponse
-from src.core.dependencies.auth import (
+from core.dependencies.auth import (
     get_db,
     get_current_user
 )
 from typing import Annotated
-from src.core.models.user_models import (
+from core.models.user_models import (
     UsersBase,
     SkillsBase,
     UserSkillsAssociation
@@ -24,7 +24,7 @@ from sqlalchemy.orm import (
     selectinload
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.schemas.user_patterns import (
+from core.schemas.user_patterns import (
     UserDataPublicTemplate,
     SkillsVitalTemplate
 )

@@ -8,7 +8,7 @@ from fastapi.responses import (
 )
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.models.user_models import (
+from core.models.user_models import (
     UsersBase,
     ProjectRolesBase,
     SkillsBase,
@@ -19,7 +19,7 @@ from src.core.models.user_models import (
     ProjectRoleUsersAssociation,
     ProjectRoleSkillsAssociation
 )
-from src.core.dependencies.auth import (
+from core.dependencies.auth import (
     get_db,
     get_current_user
 )
