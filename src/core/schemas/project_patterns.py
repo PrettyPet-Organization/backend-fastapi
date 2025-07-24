@@ -1,8 +1,11 @@
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    Field
+)
 from datetime import datetime
 from decimal import Decimal
 from .user_patterns import (
-    UserDataPublicTemplate,
+    UserCompleteDataTemplate,
     SkillsVitalTemplate
 )
 
@@ -34,7 +37,7 @@ class ExtendedProjectTemplate(
     BaseModel
 ):
     roles: list[SkillsVitalTemplate]
-    assigned_user: list[UserDataPublicTemplate]
+    users: list[UserCompleteDataTemplate]
 
 
 

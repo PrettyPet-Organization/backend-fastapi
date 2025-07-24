@@ -45,10 +45,11 @@ from sqlalchemy import (
 roles_router = APIRouter()
 
 
-@roles_router.post("/api/v1/projects/{project_id}/roles", status_code = 201, response_model=CompleteRoleTemplate)
+@roles_router.post("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model=CompleteRoleTemplate)
 async def add_role_to_the_project(
     project_id: int,
-    new_role_data: BasicRoleTemplate,
+    role_id: int,
+    # new_role_data: BasicRoleTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)]
 ) -> ProjectRolesBase:
@@ -70,10 +71,10 @@ async def add_role_to_the_project(
     if project_data_scalar.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "Only creator is allowed to add new roles to the project")
     
-    new_role = ProjectRolesBase(
-        **(new_role_data.model_dump())
-    )
-
+    # new_role = ProjectRolesBase(
+    #     **(new_role_data.model_dump())
+    # )
+    new_role = ...
     await db.add(new_role)
     await db.commit()
 

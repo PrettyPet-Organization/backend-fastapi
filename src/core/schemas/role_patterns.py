@@ -1,8 +1,25 @@
 from pydantic import BaseModel
 
 
+class IdMixin(BaseModel):
+    id: int
+
+
+class RoleTypeMixin(BaseModel):
+    name: str
+
+
+class RoleTypeTemplate(
+    RoleTypeMixin,
+    IdMixin,
+    BaseModel
+):
+    pass
+
+# class 
+
 class BasicRoleTemplate(BaseModel):
-    role_type: dict # this should be another thing 
+    role_type: RoleTypeTemplate 
     project_id: int
     description: str
     required_skills_description: str
@@ -11,3 +28,4 @@ class BasicRoleTemplate(BaseModel):
 
 class CompleteRoleTemplate(BasicRoleTemplate, BaseModel):
     id: int
+

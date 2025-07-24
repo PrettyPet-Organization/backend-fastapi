@@ -1,7 +1,8 @@
 from fastapi import (
     APIRouter,
     HTTPException,
-    Depends
+    Depends,
+    Response
 )
 from fastapi.responses import JSONResponse
 from core.dependencies.auth import (
@@ -25,15 +26,19 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.schemas.user_patterns import (
-    UserDataPublicTemplate,
-    SkillsVitalTemplate
+    UserPutTemplate,
+    SkillsVitalTemplate,
+    SkillsResponseTemplate,
+    UserCompleteDataTemplate
+    # UserDataPublicTemplate,
+    # BasicUserDataTemplate
 )
 
 
 users_router = APIRouter()
 
 
-@users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserDataPublicTemplate)
+@users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserCompleteDataTemplate)
 async def get_user(
     users_id: int,
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -60,10 +65,10 @@ async def get_user(
         )
     
 
-@users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserDataPublicTemplate)
+@users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserCompleteDataTemplate)
 async def update_user(
     user_id: int,
-    data_to_update: UserDataPublicTemplate,
+    data_to_update: UserPutTemplate,
     user_data: Annotated[UsersBase, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> UsersBase:
@@ -76,13 +81,33 @@ async def update_user(
             UsersBase.id == user_id
         )
         .values(
+            id = user_id,
             **(data_to_update.model_dump())
         )
     )
-    user_data = await db.execute(stmt)
+    await db.execute(stmt)
     await db.commit()
 
-    return data_to_update
+    stmt = (
+        select(
+            UsersBase
+        )
+        .options(
+            joinedload(UsersBase.level),
+            selectinload(UsersBase.skills)
+        )
+        .where(
+            UsersBase.id == user_id
+        )
+    )
+    
+    response_data = await db.execute(stmt)
+    response_data = response_data.scalar_one_or_none()
+
+    if not response_data:
+        raise HTTPException(status_code = 404, detail = "No user with such id")
+
+    return response_data
 
 
 @users_router.get("/api/v1/users/{user_id}/skills", response_model = list[SkillsVitalTemplate])
@@ -93,7 +118,7 @@ async def get_skills(
     stmt = (
         select(SkillsBase)
         .where(
-            SkillsBase.users.id == user_id
+            SkillsBase.users.any(UsersBase.id == user_id)
         )
     )
 
@@ -101,14 +126,15 @@ async def get_skills(
     skills_data = skills_data.scalars()
     return skills_data
 
+### какая-то 
 
-@users_router.post("/api/v1/users/{user_id}/skills")
+@users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", response_model = SkillsVitalTemplate)
 async def add_skill(
     user_id: int,
     skill_id: int,
     user: Annotated[UsersBase, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
-) -> JSONResponse:
+) -> SkillsBase:
     if user.id != user_id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to add skills to this user")
 
@@ -130,18 +156,13 @@ async def add_skill(
     if not skill_to_add:
         raise HTTPException(detail = "There is no skill with such id in the database", status_code = 400)
     
-    await db.add(skill_add)
+    db.add(skill_add)
     await db.commit()
 
-    response = {
-        "message": "skill added successfully",
-        "skill": SkillsVitalTemplate(skill_to_add).model_dump()
-    }
-    return JSONResponse(
-        content = response,
-        status_code = 201
-    )
+    await db.refresh(skill_to_add)
+    return skill_to_add
 
+### какая-то
 
 @users_router.delete("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill(
@@ -164,8 +185,4 @@ async def delete_skill(
     await db.execute(stmt)
     await db.commit()
 
-    return JSONResponse(
-        content = {},
-        status_code = 204
-    )
-
+    return Response(status_code = 204)

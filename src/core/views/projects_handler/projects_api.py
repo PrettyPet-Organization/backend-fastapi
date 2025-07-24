@@ -3,6 +3,9 @@ from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
+    Header,
+    Response,
+    Security,
     Query
 )
 from core.dependencies.auth import (
@@ -29,6 +32,9 @@ from core.schemas.project_patterns import (
 from core.schemas.query_handler import (
     ListQueryTemplate
 )
+from core.schemas.user_patterns import (
+    UserCompleteDataTemplate
+)
 from sqlalchemy.orm import (
     joinedload,
     selectinload
@@ -50,7 +56,7 @@ projects_router = APIRouter()
 @projects_router.post("/api/v1/projects", status_code=201, response_model = ProjectTemplate)
 async def create_project(
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    user_data: Annotated[UsersBase, Security(get_current_user)],
     new_project_data: ProjectImputableTemplate,
 ) -> ProjectBase:
     new_project = ProjectBase(
@@ -58,20 +64,20 @@ async def create_project(
         creator_id = user_data.id
     )
 
-    await db.add(new_project)
+    db.add(new_project)
     await db.commit()
     await db.refresh(new_project)
 
     return new_project
         
-###
+### doesn't work without the query text
 
 @projects_router.get("/api/v1/projects", status_code = 200, response_model = ExtendedProjectTemplate)
 async def get_projects(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge = 1),
     size: int = Query(10, ge=1, le=100),
-    query_filter: str | None = None
+    query_filter: str | None = ""
 ) -> ProjectBase:
     page = page if page else 1
     size = size if size else 10
@@ -126,7 +132,9 @@ async def get_projects(
 
     return projects_filtered_scalared
 
-###
+### doesn't work without the query text
+
+### fix pydantic model
 
 @projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ExtendedProjectTemplate)
 async def retreive_project_by_id(
@@ -138,7 +146,8 @@ async def retreive_project_by_id(
         select(ProjectBase)
         .options(
             selectinload(ProjectBase.roles)
-                .selectinload(ProjectRolesBase.skills)
+                .selectinload(ProjectRolesBase.skills),
+            selectinload(ProjectBase.roles)
                 .selectinload(ProjectRolesBase.users),
             joinedload(ProjectBase.creator)
         )
@@ -154,6 +163,7 @@ async def retreive_project_by_id(
     else:
         return response
 
+### fix pidantic model
 
 @projects_router.delete("/api/v1/projects/{project_id}", status_code = 204)
 async def delete_project(
@@ -181,10 +191,7 @@ async def delete_project(
         data_on_delete = await db.execute(stmt)
         await db.commit()
         logging.info(data_on_delete)
-        return JSONResponse(
-            content = {},
-            status_code = 204
-        )
+        return Response(status_code = 204)
     
     except Exception as e:
         logging.warning(e)
@@ -234,7 +241,7 @@ async def change_project(
         )
     )
 
-    data = await db.execute(stmt)
+    await db.execute(stmt)
 
     await db.commit()
 
