@@ -1,6 +1,7 @@
 from fastapi import (
     APIRouter,
     Depends,
+    Response,
     HTTPException
 )
 from fastapi.responses import (
@@ -13,7 +14,8 @@ from core.schemas.project_patterns import (
 )
 from core.schemas.role_patterns import (
     BasicRoleTemplate,
-    CompleteRoleTemplate
+    CompleteRoleTemplate,
+    RoleInput
 )
 from typing import Annotated
 from core.dependencies.auth import (
@@ -40,16 +42,23 @@ from sqlalchemy import (
     update,
     delete
 )
-
+from core.schemas.pydantic_shcemas.role_schemas import (
+    RoleOutputTemplate,
+    RoleInputTemplate,
+    RoleExtendedOutputTemplate
+)
+# from core.schemas.pydantic_shcemas.user_schemas import (
+#     ...
+# )
 
 roles_router = APIRouter()
 
 
-@roles_router.post("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model=CompleteRoleTemplate)
+@roles_router.post("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model=RoleOutputTemplate)
 async def add_role_to_the_project(
     project_id: int,
     role_id: int,
-    # new_role_data: BasicRoleTemplate,
+    new_role_data: RoleInputTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)]
 ) -> ProjectRolesBase:
@@ -71,19 +80,38 @@ async def add_role_to_the_project(
     if project_data_scalar.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "Only creator is allowed to add new roles to the project")
     
-    # new_role = ProjectRolesBase(
-    #     **(new_role_data.model_dump())
-    # )
-    new_role = ...
-    await db.add(new_role)
+    new_role = ProjectRolesBase(
+        role_type_id = role_id,
+        project_id = project_id,
+        **(new_role_data.model_dump())
+    )
+    db.add(new_role)
     await db.commit()
 
-    await db.refresh(project_data_scalar)
+    # await db.refresh(project_data_scalar)
+    # await db.refresh(new_role)
 
-    return project_data_scalar
+    stmt = (
+        select(
+            ProjectRolesBase
+        )
+        .options(
+            joinedload(ProjectRolesBase.role_types)
+        )
+        .where(
+            ProjectRolesBase.role_type_id == role_id,
+            ProjectRolesBase.project_id == project_id
+        )
+    )
+    
+    return_data = await db.execute(stmt)
+    return_data = return_data.scalar_one_or_none()
 
+    return return_data
 
-@roles_router.get("/api/v1/projects/{project_id}/roles", status_code = 200, response_model = list[CompleteRoleTemplate])
+###
+
+@roles_router.get("/api/v1/projects/{project_id}/roles", status_code = 200, response_model = list[RoleOutputTemplate])
 async def get_project_roles(
     project_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -91,28 +119,26 @@ async def get_project_roles(
 ) -> list[ProjectRolesBase]:
     stmt = (
         select(
-            ProjectBase
+            ProjectRolesBase
         )
         .options(
-            joinedload(ProjectBase.roles)
+            joinedload(ProjectRolesBase.role_types)
         )
         .where(
-            ProjectBase.id == project_id
+            ProjectRolesBase.project_id == project_id
         )
     )
+    roles_data = await db.execute(stmt)  
 
-    project_data = await db.execute(stmt)  
+    roles_data = roles_data.scalars().all()
 
-    project_data = project_data.scalar_one_or_none()
-
-    if not project_data:
+    if not roles_data:
         raise HTTPException(status_code = 404, detail = "No project with such id was found")
     
-    return project_data.roles
+    return roles_data
 
-###
 
-@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = ExtendedProjectTemplate)
+@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = RoleExtendedOutputTemplate)
 async def change_project_role(
     project_id: int,
     role_id: int,
@@ -126,10 +152,11 @@ async def change_project_role(
         )
         .options(
             joinedload(ProjectRolesBase.project)
-                .joinedload(ProjectBase.creator)
+                .joinedload(ProjectBase.creator),
+            joinedload(ProjectRolesBase.role_types)
         )
         .where(
-            ProjectRolesBase.id == role_id
+            ProjectRolesBase.project_id == project_id
         )
     )
 
@@ -140,6 +167,8 @@ async def change_project_role(
         raise HTTPException(status_code = 404, detail = "There was no such role found in the project")
     elif role_info_scalar.project.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to change data here")
+    elif not role_id == role_info_scalar.id:
+        raise HTTPException(status_code = 404, detail = "The role was not found in the project")
 
     stmt = (
         update(ProjectRolesBase)
@@ -147,7 +176,7 @@ async def change_project_role(
             **(project_role_data.model_dump())
         )
         .where(
-            ProjectRolesBase.id == project_id
+            ProjectRolesBase.id == role_id
         )
     )
 
@@ -159,7 +188,6 @@ async def change_project_role(
     return role_info_scalar
 
 
-###   
     
 @roles_router.delete("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 204)
 async def delete_role(
@@ -200,8 +228,5 @@ async def delete_role(
     await db.execute(stmt)
     await db.commit()
 
-    return JSONResponse(
-        content = {},
-        status_code = 204
-    )
+    return Response(status_code = 204)
     

@@ -5,16 +5,25 @@ from pydantic import (
 from datetime import datetime
 from decimal import Decimal
 from .user_patterns import (
+    IdMixin,
     UserCompleteDataTemplate,
-    SkillsVitalTemplate
+    SkillsVitalTemplate,
+    CreatorDataMixin
+)
+from .role_patterns import (
+    CompleteRoleTemplate
 )
 
-
-class TimeMixin(BaseModel):
+class TimeMixin(
+    BaseModel
+):
     created_at: datetime
     updated_at: datetime    
 
-class ProjectImputableTemplate(BaseModel):
+class ProjectImputableTemplate(
+    IdMixin,
+    BaseModel
+):
     title: str
     description: str
     desired_fundraising_amount: Decimal
@@ -23,12 +32,17 @@ class ProjectImputableTemplate(BaseModel):
 
 class ProjectTemplate(
     ProjectImputableTemplate,
+    TimeMixin,
     BaseModel
 ):
-    id: int
-    created_at: datetime
-    updated_at: datetime
     creator_id: int
+
+class RoleTemplateExtended(
+    CompleteRoleTemplate,
+    BaseModel
+):
+    users: list[UserCompleteDataTemplate]
+    skills: list[SkillsVitalTemplate]
 
 
 class ExtendedProjectTemplate(
@@ -36,8 +50,8 @@ class ExtendedProjectTemplate(
     TimeMixin,
     BaseModel
 ):
-    roles: list[SkillsVitalTemplate]
-    users: list[UserCompleteDataTemplate]
+    creator: CreatorDataMixin
+    roles: list[RoleTemplateExtended]
 
 
 

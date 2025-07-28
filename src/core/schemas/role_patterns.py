@@ -29,3 +29,8 @@ class BasicRoleTemplate(BaseModel):
 class CompleteRoleTemplate(BasicRoleTemplate, BaseModel):
     id: int
 
+
+class RoleInput(BaseModel):
+    description: str
+    required_skills_description: str
+    number_of_needed: int

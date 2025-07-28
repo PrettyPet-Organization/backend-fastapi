@@ -33,12 +33,18 @@ from core.schemas.user_patterns import (
     # UserDataPublicTemplate,
     # BasicUserDataTemplate
 )
+from core.schemas.pydantic_shcemas.user_schemas import (
+    UserOutputTemplate,
+    SkillsTemplate,
+    PutUserTemplate,
+    SkillsWithMessageTemplate
+)
 
 
 users_router = APIRouter()
 
 
-@users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserCompleteDataTemplate)
+@users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserOutputTemplate)
 async def get_user(
     users_id: int,
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -65,10 +71,10 @@ async def get_user(
         )
     
 
-@users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserCompleteDataTemplate)
+@users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserOutputTemplate)
 async def update_user(
     user_id: int,
-    data_to_update: UserPutTemplate,
+    data_to_update: PutUserTemplate,
     user_data: Annotated[UsersBase, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> UsersBase:
@@ -110,7 +116,7 @@ async def update_user(
     return response_data
 
 
-@users_router.get("/api/v1/users/{user_id}/skills", response_model = list[SkillsVitalTemplate])
+@users_router.get("/api/v1/users/{user_id}/skills", response_model = list[SkillsTemplate])
 async def get_skills(
     user_id: int,
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -124,11 +130,12 @@ async def get_skills(
 
     skills_data = await db.execute(stmt)
     skills_data = skills_data.scalars()
+
     return skills_data
 
 ### какая-то 
 
-@users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", response_model = SkillsVitalTemplate)
+@users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", response_model = SkillsWithMessageTemplate)
 async def add_skill(
     user_id: int,
     skill_id: int,
@@ -162,7 +169,6 @@ async def add_skill(
     await db.refresh(skill_to_add)
     return skill_to_add
 
-### какая-то
 
 @users_router.delete("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill(

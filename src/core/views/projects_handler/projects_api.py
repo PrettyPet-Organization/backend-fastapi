@@ -39,6 +39,11 @@ from sqlalchemy.orm import (
     joinedload,
     selectinload
 )
+from core.schemas.pydantic_shcemas.project_schemas import (
+    ProjectTemplateV2,
+    ProjectTemplateShort,
+    NewProjectTemplate
+)
 from sqlalchemy import (
     insert,
     delete,
@@ -53,11 +58,11 @@ from sqlalchemy import (
 projects_router = APIRouter()
 
 
-@projects_router.post("/api/v1/projects", status_code=201, response_model = ProjectTemplate)
+@projects_router.post("/api/v1/projects", status_code=201, response_model = ProjectTemplateShort)
 async def create_project(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Security(get_current_user)],
-    new_project_data: ProjectImputableTemplate,
+    new_project_data: NewProjectTemplate,
 ) -> ProjectBase:
     new_project = ProjectBase(
         **(new_project_data.model_dump()),
@@ -66,13 +71,14 @@ async def create_project(
 
     db.add(new_project)
     await db.commit()
+
     await db.refresh(new_project)
 
     return new_project
         
-### doesn't work without the query text
 
-@projects_router.get("/api/v1/projects", status_code = 200, response_model = ExtendedProjectTemplate)
+
+@projects_router.get("/api/v1/projects", status_code = 200, response_model = list[ProjectTemplateV2])
 async def get_projects(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge = 1),
@@ -82,19 +88,20 @@ async def get_projects(
     page = page if page else 1
     size = size if size else 10
 
-    if query_filter:
-        tsvector = (
-            func.to_tsvector('russian', ProjectBase.title + ' ' + ProjectBase.description)
-        )
-        tsquery = func.plainto_tsquery('russian', query_filter)
+    tsvector = (
+        func.to_tsvector('russian', ProjectBase.title + ' ' + ProjectBase.description)
+    )
+    tsquery = func.plainto_tsquery('russian', query_filter)
 
-        rank = func.ts_rank(tsvector, tsquery)
+    rank = func.ts_rank(tsvector, tsquery)
+    if query_filter:
         stmt = (
             select(
                 ProjectBase, rank.label("rank")
             )
             .options(
                 selectinload(ProjectBase.roles)
+                    .joinedload(ProjectRolesBase.role_types)
             )
             .where(
                 tsvector.op('@@')(tsquery)
@@ -107,34 +114,22 @@ async def get_projects(
         )
     else:
         stmt = (
-            select(
-                ProjectBase
-            )
+            select(ProjectBase)
             .options(
                 selectinload(ProjectBase.roles)
+                    .joinedload(ProjectRolesBase.role_types)
             )
-            .where(
-                or_(
-                    ProjectBase.description.ilike(query_filter),
-                    ProjectBase.title.ilike(query_filter)
-                )
-            )
-            .order_by(
-                desc(ProjectBase.created_at)
-            )
+            .order_by(desc(ProjectBase.created_at))
             .limit(size)
             .offset((page - 1) * size)
+
         )
- 
 
     projects_filtered = await db.execute(stmt)
     projects_filtered_scalared = projects_filtered.scalars()
 
     return projects_filtered_scalared
 
-### doesn't work without the query text
-
-### fix pydantic model
 
 @projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ExtendedProjectTemplate)
 async def retreive_project_by_id(
@@ -147,6 +142,8 @@ async def retreive_project_by_id(
         .options(
             selectinload(ProjectBase.roles)
                 .selectinload(ProjectRolesBase.skills),
+            selectinload(ProjectBase.roles)
+                .selectinload(ProjectRolesBase.role_types),
             selectinload(ProjectBase.roles)
                 .selectinload(ProjectRolesBase.users),
             joinedload(ProjectBase.creator)
@@ -163,7 +160,6 @@ async def retreive_project_by_id(
     else:
         return response
 
-### fix pidantic model
 
 @projects_router.delete("/api/v1/projects/{project_id}", status_code = 204)
 async def delete_project(
@@ -201,10 +197,10 @@ async def delete_project(
         )
 
 
-@projects_router.put("/api/v1/projects/{project_id}", status_code = 201, response_model = ProjectTemplate)
+@projects_router.put("/api/v1/projects/{project_id}", status_code = 201, response_model = ProjectTemplateV2)
 async def change_project(
     project_id: int,
-    new_project_data: ProjectImputableTemplate,
+    new_project_data: NewProjectTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)]
 ) -> ProjectBase:
@@ -213,7 +209,9 @@ async def change_project(
             ProjectBase
         )
         .options(
-            joinedload(ProjectBase.creator)
+            joinedload(ProjectBase.creator),
+            selectinload(ProjectBase.roles)
+                .selectinload(ProjectRolesBase.role_types),
         )
         .where(
             ProjectBase.id == project_id

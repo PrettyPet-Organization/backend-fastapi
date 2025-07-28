@@ -45,7 +45,7 @@ async def skill_data(
     skill_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)]
-):
+) -> JSONResponse:
     stmt = (
         select(
             ProjectRolesBase

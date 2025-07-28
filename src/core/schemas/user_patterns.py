@@ -65,11 +65,12 @@ class UserCompleteDataTemplate(
 ):
     pass
 
+class CreatorDataMixin(
+    IdMixin,
+    DateTimeMixin,
+    BasicUserDataMixin,
+    BaseModel
+):
+    pass
 
-# class UserDataPublicTemplate(
-#     BasicUserDataTemplate,
-#     UserAdditionalData,
-#     BaseModel
-# ):
-#     pass
 
