@@ -1,53 +1,64 @@
 from pydantic import BaseModel
 from datetime import datetime
 from decimal import Decimal
+from .pydantic_mixins import (
+    IdMixin,
+    RoleEssentialsMixin,
+    RoleTypeMixin,
+    DateTimeMixin,
+    BasicUserDataMixin,
+    DecimalProjectMixin,
+    ProjectEssentialsMixin,
+    EmailMixin
+)
+from .extended_mixins import (
+    BasicRoleTemplate,
+    BasicSkillsTemplate
+)
 
-class RoleTypeOutput(BaseModel):
-    id: int
-    name: str
 
 
-class RoleOutputTemplate(BaseModel):
-    id: int
-    role_types: RoleTypeOutput | None
+class RoleOutputTemplate(
+    BaseModel,
+    RoleEssentialsMixin,
+    IdMixin
+):
+    role_types: BasicRoleTemplate | None
     project_id: int | None
-    description: str | None
-    required_skills_description: str | None
-    number_of_needed: int | None
 
 
-class RoleInputTemplate(BaseModel):
-    description: str
-    required_skills_description: str
-    number_of_needed: int
+class RoleInputTemplate(
+    BaseModel,
+    RoleEssentialsMixin
+):
+    pass
 
 
-class UserTemplateProto(BaseModel):
-    id: int
-    email: str
-    full_name: str | None
-    bio: str | None
-    preferences: str | None
-    experience: str | None
-    created_at: datetime 
-    updated_at: datetime
+class UserTemplateProto(
+    BaseModel,
+    DateTimeMixin,
+    BasicUserDataMixin,
+    EmailMixin,
+    IdMixin
+):
+    pass
 
 
-class ProjectTemplate(BaseModel):
-    id: int
-    title: str
-    description: str
-    desired_fundraising_amount: Decimal
-    entry_ticket_price: Decimal
+class ProjectTemplate(
+    BaseModel,
+    ProjectEssentialsMixin,
+    DecimalProjectMixin,
+    IdMixin
+):
     creator: UserTemplateProto
 
 
-class RoleExtendedOutputTemplate(BaseModel):
-    id: int
-    role_types: RoleTypeOutput | None
+class RoleExtendedOutputTemplate(
+    BaseModel,
+    RoleEssentialsMixin,
+    IdMixin
+):
+    role_types: BasicRoleTemplate | None
     project_id: int | None
-    description: str | None
-    required_skills_description: str | None
-    number_of_needed: int | None
 
     project: ProjectTemplate

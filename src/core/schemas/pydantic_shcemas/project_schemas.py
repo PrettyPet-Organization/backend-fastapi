@@ -1,54 +1,62 @@
 from pydantic import BaseModel
 from decimal import Decimal
+from .pydantic_mixins import (
+    RoleTypeMixin,
+    DecimalProjectMixin,
+    ProjectEssentialsMixin,
+    BasicUserDataMixin,
+    RoleEssentialsMixin,
+    IdMixin
+)
+from .extended_mixins import (
+    BasicRoleTemplate
+)
+
+# class RoleTemplate(
+#     BaseModel,
+#     RoleTypeMixin
+# ):
+#     pass
 
 
-class RoleTypeTemplate(BaseModel):
-    id: int
-    name: str
-
-class NewProjectTemplate(BaseModel):
-    title: str
-    description: str
-    desired_fundraising_amount: Decimal
-    entry_ticket_price: Decimal
+class NewProjectTemplate(
+    BaseModel,
+    DecimalProjectMixin,
+    ProjectEssentialsMixin
+):
+    pass
 
 
-class CreatorTemplate(BaseModel):
-    id: int 
+class CreatorTemplate(
+    BaseModel,
+    IdMixin
+):
+    pass 
     
+class RoleTemplate(
+    BaseModel,
+    RoleEssentialsMixin,
+    IdMixin
+):
+    role_types: BasicRoleTemplate
 
 
-class RoleTemplate(BaseModel):
-    id: int
-    required_skills_description: str
-    number_of_needed: int
-    role_types: RoleTypeTemplate
-
-
-class ProjectTemplateV2(BaseModel):
-    id: int | None
-    title: str | None
-    description: str | None
-    desired_fundraising_amount: Decimal | None
-    entry_ticket_price: Decimal | None
+class ProjectTemplateV2(
+    BaseModel,
+    DecimalProjectMixin,
+    ProjectEssentialsMixin,
+    IdMixin    
+):
     creator_id: int | None
-    roles: list[RoleTemplate] | None
+    roles: list[BasicRoleTemplate] | None
 
 
-class ProjectTemplateShort(BaseModel):
-    id: int
-    title: str | None
-    description: str | None
-    desired_fundraising_amount: Decimal | None
-    entry_ticket_price: Decimal | None
+class ProjectTemplateShort(
+    BaseModel,
+    DecimalProjectMixin,
+    ProjectEssentialsMixin,
+    IdMixin
+):
     creator_id: int | None
 
-
-
-# class ProjectOutputTemplate(BaseModel):
-#     id: int
-#     title: str
-#     description: str
-#     desired_fundraising_amount: float
-#     entry_ticket_price: float
 

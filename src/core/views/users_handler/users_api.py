@@ -25,19 +25,14 @@ from sqlalchemy.orm import (
     selectinload
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.schemas.user_patterns import (
-    UserPutTemplate,
-    SkillsVitalTemplate,
-    SkillsResponseTemplate,
-    UserCompleteDataTemplate
-    # UserDataPublicTemplate,
-    # BasicUserDataTemplate
-)
 from core.schemas.pydantic_shcemas.user_schemas import (
     UserOutputTemplate,
-    SkillsTemplate,
+    # BasicSkillsTemplate,
     PutUserTemplate,
     SkillsWithMessageTemplate
+)
+from core.schemas.pydantic_shcemas.extended_mixins import (
+    BasicSkillsTemplate
 )
 
 
@@ -116,7 +111,7 @@ async def update_user(
     return response_data
 
 
-@users_router.get("/api/v1/users/{user_id}/skills", response_model = list[SkillsTemplate])
+@users_router.get("/api/v1/users/{user_id}/skills", response_model = list[BasicSkillsTemplate])
 async def get_skills(
     user_id: int,
     db: Annotated[AsyncSession, Depends(get_db)]
@@ -133,7 +128,6 @@ async def get_skills(
 
     return skills_data
 
-### какая-то 
 
 @users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", response_model = SkillsWithMessageTemplate)
 async def add_skill(

@@ -24,17 +24,6 @@ from core.models.user_models import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import JSONResponse
 from typing import Annotated
-from core.schemas.project_patterns import (
-    ProjectTemplate,
-    ProjectImputableTemplate,
-    ExtendedProjectTemplate,
-)
-from core.schemas.query_handler import (
-    ListQueryTemplate
-)
-from core.schemas.user_patterns import (
-    UserCompleteDataTemplate
-)
 from sqlalchemy.orm import (
     joinedload,
     selectinload
@@ -131,7 +120,7 @@ async def get_projects(
     return projects_filtered_scalared
 
 
-@projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ExtendedProjectTemplate)
+@projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ProjectTemplateV2)
 async def retreive_project_by_id(
     project_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],

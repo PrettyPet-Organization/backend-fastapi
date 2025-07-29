@@ -7,16 +7,11 @@ from fastapi import (
 from fastapi.responses import (
     JSONResponse
 )
-from core.schemas.project_patterns import (
-    ProjectImputableTemplate,
-    RoleInputTemplate,
-    ExtendedProjectTemplate
-)
-from core.schemas.role_patterns import (
-    BasicRoleTemplate,
-    CompleteRoleTemplate,
-    RoleInput
-)
+# from core.schemas.project_patterns import (
+#     ProjectImputableTemplate,
+#     RoleInputTemplate,
+#     ExtendedProjectTemplate
+# )
 from typing import Annotated
 from core.dependencies.auth import (
     get_db,
@@ -109,7 +104,7 @@ async def add_role_to_the_project(
 
     return return_data
 
-###
+
 
 @roles_router.get("/api/v1/projects/{project_id}/roles", status_code = 200, response_model = list[RoleOutputTemplate])
 async def get_project_roles(
