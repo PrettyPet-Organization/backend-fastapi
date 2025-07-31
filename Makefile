@@ -58,3 +58,6 @@ docker-logs:
 
 docker-postgres-logs:
 	docker compose logs -f backend-fastapi-postgres
+
+run-tests:
+	uv run pytest -c src/pytest.ini .

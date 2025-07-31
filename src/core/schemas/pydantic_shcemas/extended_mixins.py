@@ -2,27 +2,27 @@ from .pydantic_mixins import (
     IdMixin
 )
 from pydantic import (
-    BaseModel,
-    Field
+    Field,
+    BaseModel
 )
 
 
 
 class BasicLevelTemplate(
-    BaseModel,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     name: str = Field(min_length = 4, max_length = 255)
 
 
 class BasicRoleTemplate(
-    BaseModel,
-    IdMixin
+    IdMixin,
+    BaseModel
 ): 
     name: str = Field(min_length = 4, max_length = 255)
 
 class BasicSkillsTemplate(
-    BaseModel,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     name: str = Field(min_length = 4, max_length = 255)

@@ -19,44 +19,44 @@ from .extended_mixins import (
 
 
 class RoleOutputTemplate(
-    BaseModel,
     RoleEssentialsMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     role_types: BasicRoleTemplate | None
     project_id: int | None
 
 
 class RoleInputTemplate(
-    BaseModel,
-    RoleEssentialsMixin
+    RoleEssentialsMixin,
+    BaseModel
 ):
     pass
 
 
 class UserTemplateProto(
-    BaseModel,
     DateTimeMixin,
     BasicUserDataMixin,
     EmailMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     pass
 
 
 class ProjectTemplate(
-    BaseModel,
     ProjectEssentialsMixin,
     DecimalProjectMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     creator: UserTemplateProto
 
 
 class RoleExtendedOutputTemplate(
-    BaseModel,
     RoleEssentialsMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     role_types: BasicRoleTemplate | None
     project_id: int | None

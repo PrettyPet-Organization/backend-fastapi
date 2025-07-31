@@ -13,18 +13,18 @@ from .extended_mixins import (
 
 
 class SkillsWithMessageTemplate(
-    BaseModel,
-    BasicSkillsTemplate
+    BasicSkillsTemplate,
+    BaseModel
 ):
     message: str = "Skill added successfully"
 
 
 class UserOutputTemplate(
-    BaseModel,
     BasicUserDataMixin,
     EmailMixin,
     DateTimeMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     
     level: BasicLevelTemplate | None
@@ -33,8 +33,8 @@ class UserOutputTemplate(
 
 
 class PutUserTemplate(
-    BaseModel,
     BasicUserDataMixin,    
-    EmailMixin
+    EmailMixin,
+    BaseModel
 ):
     pass

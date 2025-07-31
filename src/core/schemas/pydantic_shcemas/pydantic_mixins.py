@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Optional, Annotated
 
 class IdMixin(BaseModel):
-    id: int
+    id: int = Field(ge=1)
 
 
 class DateTimeMixin(BaseModel):

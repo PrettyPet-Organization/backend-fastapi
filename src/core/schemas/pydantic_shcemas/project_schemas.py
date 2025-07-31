@@ -12,50 +12,44 @@ from .extended_mixins import (
     BasicRoleTemplate
 )
 
-# class RoleTemplate(
-#     BaseModel,
-#     RoleTypeMixin
-# ):
-#     pass
-
 
 class NewProjectTemplate(
-    BaseModel,
     DecimalProjectMixin,
-    ProjectEssentialsMixin
+    ProjectEssentialsMixin,
+    BaseModel
 ):
     pass
 
 
 class CreatorTemplate(
-    BaseModel,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     pass 
     
 class RoleTemplate(
-    BaseModel,
     RoleEssentialsMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     role_types: BasicRoleTemplate
 
 
 class ProjectTemplateV2(
-    BaseModel,
     DecimalProjectMixin,
     ProjectEssentialsMixin,
-    IdMixin    
+    IdMixin,  
+    BaseModel
 ):
     creator_id: int | None
     roles: list[BasicRoleTemplate] | None
 
 
 class ProjectTemplateShort(
-    BaseModel,
     DecimalProjectMixin,
     ProjectEssentialsMixin,
-    IdMixin
+    IdMixin,
+    BaseModel
 ):
     creator_id: int | None
 
