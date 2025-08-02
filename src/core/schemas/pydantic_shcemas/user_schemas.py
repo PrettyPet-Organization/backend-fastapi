@@ -1,4 +1,7 @@
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    Field
+)
 from datetime import datetime
 from .pydantic_mixins import (
     IdMixin,
@@ -17,6 +20,12 @@ class SkillsWithMessageTemplate(
     BaseModel
 ):
     message: str = "Skill added successfully"
+
+
+class SkillsWithRoleIDTemplate(
+    SkillsWithMessageTemplate
+):
+    id: int = Field(ge=1, alias="role_id")
 
 
 class UserOutputTemplate(

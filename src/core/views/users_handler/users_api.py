@@ -2,7 +2,8 @@ from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
-    Response
+    Response,
+    Path
 )
 from fastapi.responses import JSONResponse
 from core.dependencies.auth import (
@@ -41,8 +42,8 @@ users_router = APIRouter()
 
 @users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserOutputTemplate)
 async def get_user(
-    users_id: int,
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
+    users_id: int = Path(ge=1)
 ) -> UsersBase:
     stmt = (
     select(UsersBase)
@@ -68,10 +69,10 @@ async def get_user(
 
 @users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserOutputTemplate)
 async def update_user(
-    user_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
     data_to_update: PutUserTemplate,
     user_data: Annotated[UsersBase, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
+    user_id: int = Path(ge=1),
 ) -> UsersBase:
     if user_data.id != user_id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to change this data")
@@ -111,30 +112,35 @@ async def update_user(
     return response_data
 
 
-@users_router.get("/api/v1/users/{user_id}/skills", response_model = list[BasicSkillsTemplate])
+@users_router.get("/api/v1/users/{user_id}/skills", status_code = 200, response_model = list[BasicSkillsTemplate])
 async def get_skills(
-    user_id: int,
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user_id: int = Path(ge=1)
 ) -> list[SkillsBase]:
     stmt = (
-        select(SkillsBase)
+        select(UsersBase)
+        .options(
+            selectinload(UsersBase.skills)
+        )
         .where(
-            SkillsBase.users.any(UsersBase.id == user_id)
+            UsersBase.id == user_id
         )
     )
 
-    skills_data = await db.execute(stmt)
-    skills_data = skills_data.scalars()
+    user_data = await db.execute(stmt)
+    user_data = user_data.scalar_one_or_none()
 
-    return skills_data
+    if not user_data:
+        raise HTTPException(status_code = 404, detail = "Such user was not found")
+    return user_data.skills
 
 
-@users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", response_model = SkillsWithMessageTemplate)
+@users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 201, response_model = SkillsWithMessageTemplate)
 async def add_skill(
-    user_id: int,
-    skill_id: int,
     user: Annotated[UsersBase, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user_id: int = Path(ge=1),
+    skill_id: int = Path(ge=1)
 ) -> SkillsBase:
     if user.id != user_id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to add skills to this user")
@@ -155,8 +161,8 @@ async def add_skill(
     skill_to_add = skill_to_add.scalar_one_or_none()
 
     if not skill_to_add:
-        raise HTTPException(detail = "There is no skill with such id in the database", status_code = 400)
-    
+        raise HTTPException(detail = "There is no skill with such id in the database", status_code = 404)
+
     db.add(skill_add)
     await db.commit()
 
@@ -166,10 +172,10 @@ async def add_skill(
 
 @users_router.delete("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill(
-    user_id: int,
-    skill_id: int,
     user: Annotated[UsersBase, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user_id: int = Path(ge=1),
+    skill_id: int = Path(ge=1)
 ) -> JSONResponse:
     if user.id != user_id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to delete someone else's data, other than yours")

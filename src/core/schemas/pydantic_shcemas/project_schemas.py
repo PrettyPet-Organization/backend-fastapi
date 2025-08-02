@@ -42,7 +42,7 @@ class ProjectTemplateV2(
     BaseModel
 ):
     creator_id: int | None
-    roles: list[BasicRoleTemplate] | None
+    roles: list[RoleTemplate] | None
 
 
 class ProjectTemplateShort(

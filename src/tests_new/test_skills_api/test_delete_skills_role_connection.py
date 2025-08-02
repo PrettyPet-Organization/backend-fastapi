@@ -2,28 +2,27 @@ from tests_new.basic_config import client
 import pytest
 
 
-
 @pytest.mark.parametrize(
-        "user_id, skill_id, expected_status_code",
+        "role_id, skill_id, expected_status_code",
         [
+            (50, 55, 204),
             (-100, 50, 422),
-            (50, -100, 422),
-            (50, 100, 404),
-            (100, 50, 403),
-            (50, 50, 201),
-            (50, 50, 201)
+            (50, 4000, 409),
+            (1000, 50, 404),
         ]
 )
-def test_skills_add(
+def test_delete_skill_role_connetcion(
     registered_user_data: dict,
-    user_id,
+    role_id,
     skill_id,
     expected_status_code
 ):
-    response = client.post(
-        f"/api/v1/users/{user_id}/skills/{skill_id}",
+    response = client.delete(
+        f"/api/v1/project_roles/{role_id}/skills/{skill_id}",
         headers = registered_user_data.get("jwt_auth")
     )
 
     assert response.status_code == expected_status_code
+
+
 

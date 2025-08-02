@@ -6,7 +6,8 @@ from fastapi import (
     Header,
     Response,
     Security,
-    Query
+    Query,
+    Path
 )
 from core.dependencies.auth import (
     get_db,
@@ -122,9 +123,9 @@ async def get_projects(
 
 @projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ProjectTemplateV2)
 async def retreive_project_by_id(
-    project_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    # user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1)
 ) -> ProjectBase:
     stmt = (
         select(ProjectBase)
@@ -135,7 +136,7 @@ async def retreive_project_by_id(
                 .selectinload(ProjectRolesBase.role_types),
             selectinload(ProjectBase.roles)
                 .selectinload(ProjectRolesBase.users),
-            joinedload(ProjectBase.creator)
+            # joinedload(ProjectBase.creator)
         )
         .where(
             ProjectBase.id == project_id
@@ -152,9 +153,9 @@ async def retreive_project_by_id(
 
 @projects_router.delete("/api/v1/projects/{project_id}", status_code = 204)
 async def delete_project(
-    project_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1)
 ) -> JSONResponse:
     stmt = (
         select(ProjectBase)
@@ -188,10 +189,10 @@ async def delete_project(
 
 @projects_router.put("/api/v1/projects/{project_id}", status_code = 201, response_model = ProjectTemplateV2)
 async def change_project(
-    project_id: int,
     new_project_data: NewProjectTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1)
 ) -> ProjectBase:
     stmt = (
         select(

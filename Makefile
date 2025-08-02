@@ -59,5 +59,8 @@ docker-logs:
 docker-postgres-logs:
 	docker compose logs -f backend-fastapi-postgres
 
+init-test-database:
+	cd src && uv run -m database_manip.init_tests_db
+
 run-tests:
-	uv run pytest -c src/pytest.ini .
+	make init-test-database && uv run pytest .

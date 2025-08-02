@@ -1,26 +1,26 @@
 from tests_new.basic_config import client
+import logging
 import pytest
 
 
 
 @pytest.mark.parametrize(
-        "id_shift, expected_status_code",
+        "id, expected_status_code",
         [
-            (1, 404),
-            (2, 404),
-            (3, 404),
-            (-100, 422),
-            (0, 200)
+            (50, 200),
+            (51, 200),
+            (52, 200),
+            (100, 404),
+            (0, 422)
         ]
 )
 def test_get_user_skills(
-    registered_user_data: dict,
-    id_shift,
+    id,
     expected_status_code
 ):
     response = client.get(
-        f"/api/v1/users/{registered_user_data.get('id') + id_shift}",
-        headers = registered_user_data.get("jwt_auth")
+        f"/api/v1/users/{id}/skills"
     ) 
 
+    logging.info(response.json())
     assert response.status_code == expected_status_code

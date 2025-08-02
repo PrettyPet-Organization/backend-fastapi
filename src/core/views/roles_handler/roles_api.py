@@ -2,7 +2,8 @@ from fastapi import (
     APIRouter,
     Depends,
     Response,
-    HTTPException
+    HTTPException,
+    Path
 )
 from fastapi.responses import (
     JSONResponse
@@ -25,7 +26,8 @@ from core.models.user_models import (
     ProjectRolesBase,
     ProjectBase,
     ProjectRolesBase,
-    ProjectRoleUsersAssociation
+    ProjectRoleUsersAssociation,
+    RoleTypesBase
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (
@@ -35,7 +37,8 @@ from sqlalchemy.orm import (
 from sqlalchemy import (
     select,
     update,
-    delete
+    delete,
+    and_
 )
 from core.schemas.pydantic_shcemas.role_schemas import (
     RoleOutputTemplate,
@@ -51,12 +54,24 @@ roles_router = APIRouter()
 
 @roles_router.post("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model=RoleOutputTemplate)
 async def add_role_to_the_project(
-    project_id: int,
-    role_id: int,
     new_role_data: RoleInputTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1),
+    role_id: int = Path(ge=1),
 ) -> ProjectRolesBase:
+
+    stmt = (
+        select(RoleTypesBase)
+        .where(
+            RoleTypesBase.id == role_id
+        )
+    )
+
+    role_in_the_database = await db.execute(stmt)
+    role_in_the_database = role_in_the_database.scalar_one_or_none()
+    if not role_in_the_database:
+        raise HTTPException(status_code = 404, detail = "There was no such role type found in the database")
 
     stmt = (
         select(
@@ -75,6 +90,22 @@ async def add_role_to_the_project(
     if project_data_scalar.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "Only creator is allowed to add new roles to the project")
     
+    stmt = (
+        select(ProjectRolesBase)
+        .where(
+            and_(
+                ProjectRolesBase.role_type_id == role_id,
+                ProjectRolesBase.project_id == project_id
+            )
+        )
+    )
+
+    is_existing_connection = await db.execute(stmt)
+    is_existing_connection = is_existing_connection.scalar_one_or_none()
+
+    if is_existing_connection:
+        raise HTTPException(status_code = 409, detail = "This role already is required in the project") 
+
     new_role = ProjectRolesBase(
         role_type_id = role_id,
         project_id = project_id,
@@ -82,9 +113,6 @@ async def add_role_to_the_project(
     )
     db.add(new_role)
     await db.commit()
-
-    # await db.refresh(project_data_scalar)
-    # await db.refresh(new_role)
 
     stmt = (
         select(
@@ -108,9 +136,9 @@ async def add_role_to_the_project(
 
 @roles_router.get("/api/v1/projects/{project_id}/roles", status_code = 200, response_model = list[RoleOutputTemplate])
 async def get_project_roles(
-    project_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1),
 ) -> list[ProjectRolesBase]:
     stmt = (
         select(
@@ -135,11 +163,11 @@ async def get_project_roles(
 
 @roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = RoleExtendedOutputTemplate)
 async def change_project_role(
-    project_id: int,
-    role_id: int,
     project_role_data: RoleInputTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1),
+    role_id: int = Path(ge=1),
 ) -> ProjectRolesBase:
     stmt = (
         select(
@@ -151,7 +179,10 @@ async def change_project_role(
             joinedload(ProjectRolesBase.role_types)
         )
         .where(
-            ProjectRolesBase.project_id == project_id
+            and_(
+                ProjectRolesBase.project_id == project_id,
+                ProjectRolesBase.role_type_id == role_id
+            )
         )
     )
 
@@ -171,7 +202,10 @@ async def change_project_role(
             **(project_role_data.model_dump())
         )
         .where(
-            ProjectRolesBase.id == role_id
+            and_(
+                ProjectRolesBase.role_type_id == role_id,
+                ProjectRolesBase.project_id == project_id
+            )
         )
     )
 
@@ -186,10 +220,10 @@ async def change_project_role(
     
 @roles_router.delete("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 204)
 async def delete_role(
-    project_id: int,
-    role_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    project_id: int = Path(ge=1),
+    role_id: int = Path(ge=1),
 ) -> JSONResponse:
     stmt = (
         select(
@@ -212,11 +246,43 @@ async def delete_role(
         raise HTTPException(status_code = 403, detail = "You are not allowed to change data for someone else's project" )
 
     stmt = (
+        select(RoleTypesBase)
+        .where(
+            RoleTypesBase.id == role_id
+        )
+    )
+
+    is_role_existing = await db.execute(stmt)
+    is_role_existing = is_role_existing.scalar_one_or_none()
+
+    if not is_role_existing: 
+        raise HTTPException(status_code = 404, detail = "There was no such role in the database")
+
+    stmt = (
+        select(ProjectRolesBase)
+        .where(
+            and_(
+                ProjectRolesBase.role_type_id == role_id,
+                ProjectRolesBase.project_id == project_id
+            )
+        )
+    )
+
+    is_existing_connection = await db.execute(stmt)
+    is_existing_connection = is_existing_connection.scalar_one_or_none()
+
+    if not is_existing_connection:
+        raise HTTPException(status_code = 409, detail = "There was already no such connetcion in the database")
+
+    stmt = (
         delete(
             ProjectRolesBase
         )
         .where(
-            ProjectRolesBase.project_id == project_id
+            and_(
+                ProjectRolesBase.project_id == project_id,
+                ProjectRolesBase.role_type_id == role_id
+            )
         )
     )
 

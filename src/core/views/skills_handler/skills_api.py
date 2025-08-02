@@ -1,7 +1,8 @@
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException
+    HTTPException,
+    Path
 )
 from fastapi.responses import (
     JSONResponse
@@ -33,6 +34,7 @@ from sqlalchemy.orm import (
     joinedload,
     selectinload,
 )
+from core.schemas.pydantic_shcemas.user_schemas import SkillsWithRoleIDTemplate
 
 
 
@@ -41,10 +43,10 @@ skills_router = APIRouter()
 
 @skills_router.post("/api/v1/project_roles/{role_id}/skills/{skill_id}")
 async def skill_data(
-    role_id: int,
-    skill_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    role_id: int = Path(ge=1),
+    skill_id: int = Path(ge=1)
 ) -> JSONResponse:
     stmt = (
         select(
@@ -66,6 +68,20 @@ async def skill_data(
         raise HTTPException(status_code = 404, detail = "Such role was not found")
     elif project_data.project_id != user_data.id:
         raise HTTPException(detail="You are not allowed to change this data", status_code=403)
+    elif skill_id in [i.id for i in project_data.skills]:
+        raise HTTPException(status_code = 409, detail = "This connection was already present in the database")
+
+    stmt = (
+        select(SkillsBase)
+        .where(
+            SkillsBase.id == skill_id
+        )
+    )
+
+    is_skill_present = await db.execute(stmt)
+    is_skill_present = is_skill_present.scalar_one_or_none()
+    if not is_skill_present:
+        raise HTTPException(status_code=404, detail = "No skill matched given id")
 
 
     new_role = ProjectRoleSkillsAssociation(
@@ -73,26 +89,27 @@ async def skill_data(
         skill_id = skill_id
     )
     
-    await db.add(new_role)
+    db.add(new_role)
     await db.commit()
 
     await db.refresh(project_data)
 
     return JSONResponse(
+        status_code = 201,
         content = {
             "message": "Skill added to role successfully",
             "role_id": project_data.id,
-            "skill": project_data.skills
+            "skill": {i.id: i.name for i in project_data.skills}
         }
     )
 
 
 @skills_router.delete("/api/v1/project_roles/{role_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill_connection(
-    role_id: int,
-    skill_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    user_data: Annotated[UsersBase, Depends(get_current_user)]
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    role_id: int = Path(ge=1),
+    skill_id: int = Path(ge=1)
 ) -> JSONResponse:
     stmt = (
         select(
@@ -102,7 +119,9 @@ async def delete_skill_connection(
             selectinload(ProjectRolesBase.role_types),
             joinedload(ProjectRolesBase.project)
         )
-        .where(ProjectRolesBase.id == role_id)
+        .where(
+            ProjectRolesBase.id == role_id
+        )
     )
 
     role_data = await db.execute(stmt)
@@ -112,6 +131,21 @@ async def delete_skill_connection(
         raise HTTPException(status_code = 404, detail = "Either the project or the role was not found")
     elif role_data.project.creator_id != user_data.id:
         raise HTTPException(status_code=403, detail = "You are not allowed to make such changes")
+
+    stmt = (
+        select(ProjectRoleSkillsAssociation)
+        .where(
+            and_(
+                ProjectRoleSkillsAssociation.role_id == role_id,
+                ProjectRoleSkillsAssociation.skill_id == skill_id
+            )
+        )
+    )
+    is_existing = await db.execute(stmt)
+    is_existing = is_existing.scalar_one_or_none()
+    
+    if not is_existing:
+        raise HTTPException(status_code=409, detail = "There was no such connection in the first place") 
 
     stmt = (
         delete(ProjectRoleSkillsAssociation)

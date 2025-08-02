@@ -5,17 +5,18 @@ import pytest
 @pytest.mark.parametrize(
     "id, expected_status_code",
     [
+        (1, 200),
         (-100, 422),
-        (50, 200),
-        (100, 404)
+        (1000, 404)
     ]
 )
-def test_retreive_correctly(
+def test_project_retreival(
     id,
     expected_status_code
 ):
+
     response = client.get(
-        f"/api/v1/users/{id}"
+        f"/api/v1/projects/{id}"
     )
 
     assert response.status_code == expected_status_code

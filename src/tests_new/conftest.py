@@ -1,20 +1,13 @@
-from .basic_config import (
-    client,
-    sync_test_engine as engine,
-    Base
-)
+from .basic_config import client
 import logging
 from requests import Response
 import pytest
 
 
-def get_registered_users_data(header: dict) -> Response:
-    # header = {
-    #     "Authorization": f"Bearer {token}"
-    # }
+def get_registered_users_data(headers: dict) -> Response:
     response = client.get(
         "/auth/me",
-        headers = header
+        headers = headers
     )
 
     logging.info(response.json())
@@ -44,51 +37,29 @@ def login_into_user(user_creds: dict) -> Response:
     return response
 
 
-@pytest.fixture(scope="session", autouse=True)
-def registered_user_data() -> dict:
+
+@pytest.fixture(scope="session")
+def registered_user_data():
     payload = {
         "email": "user@example.com",
         "password": "string"
     }
+    auth_data = login_into_user(payload)
+    headers = {
+        "Authorization": f"Bearer {auth_data.json().get('accessToken')}"
+    }
+    user_data = get_registered_users_data(headers)
 
-    login_data = login_into_user(payload)
-    if login_data.status_code == 200:
-        header = {
-            "Authorization": f"Bearer {login_data.json().get('accessToken')}"
-        }
-        logging.info("new user was successfully logged in")
+    user_creds = {
+        "jwt_auth": headers,
+        **user_data.json(),
+        **payload,
+        **auth_data.json()
+    }
+    logging.info(user_creds)
 
-        user_data = get_registered_users_data(header)
+    return user_creds
 
-        complete_user_data = {
-            "jwt_auth": header,
-            **login_data.json(),
-            **user_data.json(),
-            **payload
-            }
 
-        return complete_user_data
-    elif login_data.status_code == 401: 
-        logging.info(f"there was no {payload.get('email')} user in the database")
-        
-        register_data = register_new_test_user(payload)
-        
-        if register_data.status_code == 401:
-            Base.metadata.drop_all(engine = engine)
-            Base.metadata.create_all(engine = engine)
-            register_new_test_user(payload)
 
-        login_data = login_into_user(payload)
-        header = {
-            "Authorization": f"Bearer {login_data.json().get('accessToken')}"
-        }
-        user_data = get_registered_users_data(header)
 
-        complete_user_data = {
-            "jwt_auth": header,
-            **login_data.json(),
-            **user_data.json(),
-            **payload
-            }
-        
-        return complete_user_data
