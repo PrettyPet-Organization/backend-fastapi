@@ -1,6 +1,8 @@
-from tests_new.basic_config import client
 import logging
+
 import pytest
+
+from tests_new.basic_config import client
 
 
 # @pytest.mark.parametrize(
@@ -56,5 +58,5 @@ def test_user_put(
         headers = registered_user_data.get("jwt_auth"),
         json = payload
     )
-    
+
     assert response.status_code == expected_status_code

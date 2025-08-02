@@ -1,18 +1,7 @@
-from pydantic import (
-    BaseModel,
-    Field
-)
-from datetime import datetime
-from .pydantic_mixins import (
-    IdMixin,
-    EmailMixin,
-    BasicUserDataMixin,
-    DateTimeMixin
-)
-from .extended_mixins import (
-    BasicLevelTemplate,
-    BasicSkillsTemplate
-)
+from pydantic import BaseModel, Field
+
+from .extended_mixins import BasicLevelTemplate, BasicSkillsTemplate
+from .pydantic_mixins import BasicUserDataMixin, DateTimeMixin, EmailMixin, IdMixin
 
 
 class SkillsWithMessageTemplate(
@@ -35,14 +24,14 @@ class UserOutputTemplate(
     IdMixin,
     BaseModel
 ):
-    
+
     level: BasicLevelTemplate | None
     skills: list[BasicSkillsTemplate] | None
 
 
 
 class PutUserTemplate(
-    BasicUserDataMixin,    
+    BasicUserDataMixin,
     EmailMixin,
     BaseModel
 ):

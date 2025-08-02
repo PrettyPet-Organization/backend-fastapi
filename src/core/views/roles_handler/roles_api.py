@@ -1,50 +1,30 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    Response,
-    HTTPException,
-    Path
-)
-from fastapi.responses import (
-    JSONResponse
-)
 # from core.schemas.project_patterns import (
 #     ProjectImputableTemplate,
 #     RoleInputTemplate,
 #     ExtendedProjectTemplate
 # )
 from typing import Annotated
-from core.dependencies.auth import (
-    get_db,
-    get_current_user
-)
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Response
+from fastapi.responses import JSONResponse
+from sqlalchemy import and_, delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
+from core.dependencies.auth import get_current_user, get_db
 from core.models.user_models import (
-    UsersBase,
-    ProjectRolesBase,
-    SkillsBase,
-    UserSkillsAssociation,
-    ProjectRolesBase,
     ProjectBase,
     ProjectRolesBase,
-    ProjectRoleUsersAssociation,
-    RoleTypesBase
-)
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import (
-    selectinload,
-    joinedload
-)
-from sqlalchemy import (
-    select,
-    update,
-    delete,
-    and_
+    RoleTypesBase,
+    UsersBase,
 )
 from core.schemas.pydantic_shcemas.role_schemas import (
-    RoleOutputTemplate,
+    RoleExtendedOutputTemplate,
     RoleInputTemplate,
-    RoleExtendedOutputTemplate
+    RoleOutputTemplate,
 )
+
+
 # from core.schemas.pydantic_shcemas.user_schemas import (
 #     ...
 # )
@@ -89,7 +69,7 @@ async def add_role_to_the_project(
         raise HTTPException(status_code = 404, detail = "There was no project with such id in the database")
     if project_data_scalar.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "Only creator is allowed to add new roles to the project")
-    
+
     stmt = (
         select(ProjectRolesBase)
         .where(
@@ -104,7 +84,7 @@ async def add_role_to_the_project(
     is_existing_connection = is_existing_connection.scalar_one_or_none()
 
     if is_existing_connection:
-        raise HTTPException(status_code = 409, detail = "This role already is required in the project") 
+        raise HTTPException(status_code = 409, detail = "This role already is required in the project")
 
     new_role = ProjectRolesBase(
         role_type_id = role_id,
@@ -126,7 +106,7 @@ async def add_role_to_the_project(
             ProjectRolesBase.project_id == project_id
         )
     )
-    
+
     return_data = await db.execute(stmt)
     return_data = return_data.scalar_one_or_none()
 
@@ -151,13 +131,13 @@ async def get_project_roles(
             ProjectRolesBase.project_id == project_id
         )
     )
-    roles_data = await db.execute(stmt)  
+    roles_data = await db.execute(stmt)
 
     roles_data = roles_data.scalars().all()
 
     if not roles_data:
         raise HTTPException(status_code = 404, detail = "No project with such id was found")
-    
+
     return roles_data
 
 
@@ -191,9 +171,9 @@ async def change_project_role(
 
     if not role_info_scalar:
         raise HTTPException(status_code = 404, detail = "There was no such role found in the project")
-    elif role_info_scalar.project.creator_id != user_data.id:
+    if role_info_scalar.project.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to change data here")
-    elif not role_id == role_info_scalar.id:
+    if not role_id == role_info_scalar.id:
         raise HTTPException(status_code = 404, detail = "The role was not found in the project")
 
     stmt = (
@@ -211,13 +191,13 @@ async def change_project_role(
 
     await db.execute(stmt)
     await db.commit()
-    
+
     await db.refresh(role_info_scalar)
 
     return role_info_scalar
 
 
-    
+
 @roles_router.delete("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 204)
 async def delete_role(
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -242,7 +222,7 @@ async def delete_role(
 
     if not project_data:
         raise HTTPException(detail = "There was no such project in the database", status_code = 404)
-    elif project_data.creator_id != user_data.id:
+    if project_data.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to change data for someone else's project" )
 
     stmt = (
@@ -255,7 +235,7 @@ async def delete_role(
     is_role_existing = await db.execute(stmt)
     is_role_existing = is_role_existing.scalar_one_or_none()
 
-    if not is_role_existing: 
+    if not is_role_existing:
         raise HTTPException(status_code = 404, detail = "There was no such role in the database")
 
     stmt = (
@@ -290,4 +270,3 @@ async def delete_role(
     await db.commit()
 
     return Response(status_code = 204)
-    

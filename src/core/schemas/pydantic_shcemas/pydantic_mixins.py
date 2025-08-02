@@ -1,14 +1,15 @@
-from pydantic import Field, BaseModel, EmailStr
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, Annotated
+
+from pydantic import BaseModel, EmailStr, Field
+
 
 class IdMixin(BaseModel):
     id: int = Field(ge=1)
 
 
 class DateTimeMixin(BaseModel):
-    created_at: datetime 
+    created_at: datetime
     updated_at: datetime
 
 

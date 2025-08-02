@@ -1,41 +1,18 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Path
-)
-from fastapi.responses import (
-    JSONResponse
-)
 from typing import Annotated
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.models.user_models import (
-    UsersBase,
-    ProjectRolesBase,
-    SkillsBase,
-    UserSkillsAssociation,
-    ProjectRolesBase,
-    ProjectBase,
-    ProjectRolesBase,
-    ProjectRoleUsersAssociation,
-    ProjectRoleSkillsAssociation
-)
-from core.dependencies.auth import (
-    get_db,
-    get_current_user
-)
-from sqlalchemy import (
-    select,
-    update,
-    delete,
-    and_
-)
-from sqlalchemy.orm import (
-    joinedload,
-    selectinload,
-)
-from core.schemas.pydantic_shcemas.user_schemas import SkillsWithRoleIDTemplate
 
+from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi.responses import JSONResponse
+from sqlalchemy import and_, delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
+
+from core.dependencies.auth import get_current_user, get_db
+from core.models.user_models import (
+    ProjectRolesBase,
+    ProjectRoleSkillsAssociation,
+    SkillsBase,
+    UsersBase,
+)
 
 
 skills_router = APIRouter()
@@ -66,9 +43,9 @@ async def skill_data(
 
     if not project_data:
         raise HTTPException(status_code = 404, detail = "Such role was not found")
-    elif project_data.project_id != user_data.id:
+    if project_data.project_id != user_data.id:
         raise HTTPException(detail="You are not allowed to change this data", status_code=403)
-    elif skill_id in [i.id for i in project_data.skills]:
+    if skill_id in [i.id for i in project_data.skills]:
         raise HTTPException(status_code = 409, detail = "This connection was already present in the database")
 
     stmt = (
@@ -88,7 +65,7 @@ async def skill_data(
         role_id = role_id,
         skill_id = skill_id
     )
-    
+
     db.add(new_role)
     await db.commit()
 
@@ -129,7 +106,7 @@ async def delete_skill_connection(
 
     if not role_data:
         raise HTTPException(status_code = 404, detail = "Either the project or the role was not found")
-    elif role_data.project.creator_id != user_data.id:
+    if role_data.project.creator_id != user_data.id:
         raise HTTPException(status_code=403, detail = "You are not allowed to make such changes")
 
     stmt = (
@@ -143,9 +120,9 @@ async def delete_skill_connection(
     )
     is_existing = await db.execute(stmt)
     is_existing = is_existing.scalar_one_or_none()
-    
+
     if not is_existing:
-        raise HTTPException(status_code=409, detail = "There was no such connection in the first place") 
+        raise HTTPException(status_code=409, detail = "There was no such connection in the first place")
 
     stmt = (
         delete(ProjectRoleSkillsAssociation)
@@ -157,7 +134,7 @@ async def delete_skill_connection(
         )
     )
 
-    await db.execute(stmt) 
+    await db.execute(stmt)
     await db.commit()
 
     return JSONResponse(

@@ -1,6 +1,7 @@
 import asyncio
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings_config
 from core.routing import router as core_router
@@ -9,6 +10,13 @@ from core.routing import router as core_router
 app = FastAPI(debug=settings_config.debug, title="PrettyPet API")
 app.include_router(core_router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # I'm not sure if we need this block.
 async def main() -> None:

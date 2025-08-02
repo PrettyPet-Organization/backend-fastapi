@@ -1,21 +1,15 @@
 from pydantic import BaseModel
-from datetime import datetime
-from decimal import Decimal
-from .pydantic_mixins import (
-    IdMixin,
-    RoleEssentialsMixin,
-    RoleTypeMixin,
-    DateTimeMixin,
-    BasicUserDataMixin,
-    DecimalProjectMixin,
-    ProjectEssentialsMixin,
-    EmailMixin
-)
-from .extended_mixins import (
-    BasicRoleTemplate,
-    BasicSkillsTemplate
-)
 
+from .extended_mixins import BasicRoleTemplate
+from .pydantic_mixins import (
+    BasicUserDataMixin,
+    DateTimeMixin,
+    DecimalProjectMixin,
+    EmailMixin,
+    IdMixin,
+    ProjectEssentialsMixin,
+    RoleEssentialsMixin,
+)
 
 
 class RoleOutputTemplate(

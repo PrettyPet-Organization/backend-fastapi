@@ -1,6 +1,6 @@
-from tests_new.basic_config import client
 import pytest
 
+from tests_new.basic_config import client
 
 
 @pytest.mark.parametrize(

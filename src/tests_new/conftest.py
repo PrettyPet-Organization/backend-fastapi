@@ -1,7 +1,9 @@
-from .basic_config import client
 import logging
-from requests import Response
+
 import pytest
+from requests import Response
+
+from .basic_config import client
 
 
 def get_registered_users_data(headers: dict) -> Response:
@@ -11,7 +13,7 @@ def get_registered_users_data(headers: dict) -> Response:
     )
 
     logging.info(response.json())
-    
+
     return response
 
 
@@ -31,7 +33,7 @@ def login_into_user(user_creds: dict) -> Response:
         "/auth/login",
         json = user_creds
     )
-    
+
     logging.info(response.json())
 
     return response

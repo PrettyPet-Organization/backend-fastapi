@@ -1,7 +1,8 @@
-from tests_new.basic_config import client
 import logging
+
 import pytest
 
+from tests_new.basic_config import client
 
 
 @pytest.mark.parametrize(
@@ -20,7 +21,7 @@ def test_get_user_skills(
 ):
     response = client.get(
         f"/api/v1/users/{id}/skills"
-    ) 
+    )
 
     logging.info(response.json())
     assert response.status_code == expected_status_code

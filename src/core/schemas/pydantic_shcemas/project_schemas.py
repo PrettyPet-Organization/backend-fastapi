@@ -1,15 +1,11 @@
 from pydantic import BaseModel
-from decimal import Decimal
+
+from .extended_mixins import BasicRoleTemplate
 from .pydantic_mixins import (
-    RoleTypeMixin,
     DecimalProjectMixin,
+    IdMixin,
     ProjectEssentialsMixin,
-    BasicUserDataMixin,
     RoleEssentialsMixin,
-    IdMixin
-)
-from .extended_mixins import (
-    BasicRoleTemplate
 )
 
 
@@ -25,8 +21,8 @@ class CreatorTemplate(
     IdMixin,
     BaseModel
 ):
-    pass 
-    
+    pass
+
 class RoleTemplate(
     RoleEssentialsMixin,
     IdMixin,
@@ -38,7 +34,7 @@ class RoleTemplate(
 class ProjectTemplateV2(
     DecimalProjectMixin,
     ProjectEssentialsMixin,
-    IdMixin,  
+    IdMixin,
     BaseModel
 ):
     creator_id: int | None

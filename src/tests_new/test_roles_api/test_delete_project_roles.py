@@ -1,5 +1,6 @@
-from tests_new.basic_config import client
 import pytest
+
+from tests_new.basic_config import client
 
 
 @pytest.mark.parametrize(
@@ -14,7 +15,7 @@ import pytest
 )
 def test_delete_role_project_connection(
     registered_user_data: dict,
-    project_id, 
+    project_id,
     role_id,
     expected_status_code
 ):

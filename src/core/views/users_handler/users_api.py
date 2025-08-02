@@ -1,39 +1,19 @@
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Response,
-    Path
-)
-from fastapi.responses import JSONResponse
-from core.dependencies.auth import (
-    get_db,
-    get_current_user
-)
 from typing import Annotated
-from core.models.user_models import (
-    UsersBase,
-    SkillsBase,
-    UserSkillsAssociation
-)
-from sqlalchemy import (
-    select,
-    update,
-    delete
-)
-from sqlalchemy.orm import (
-    joinedload,
-    selectinload
-)
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Response
+from fastapi.responses import JSONResponse
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
+
+from core.dependencies.auth import get_current_user, get_db
+from core.models.user_models import SkillsBase, UsersBase, UserSkillsAssociation
+from core.schemas.pydantic_shcemas.extended_mixins import BasicSkillsTemplate
 from core.schemas.pydantic_shcemas.user_schemas import (
-    UserOutputTemplate,
     # BasicSkillsTemplate,
     PutUserTemplate,
-    SkillsWithMessageTemplate
-)
-from core.schemas.pydantic_shcemas.extended_mixins import (
-    BasicSkillsTemplate
+    SkillsWithMessageTemplate,
+    UserOutputTemplate,
 )
 
 
@@ -60,12 +40,11 @@ async def get_user(
     user_data = user_data.scalar_one_or_none()
     if user_data:
         return user_data
-    else:
-        raise HTTPException(
-            detail = "There is no user with such id",
-            status_code = 404
-        )
-    
+    raise HTTPException(
+        detail = "There is no user with such id",
+        status_code = 404
+    )
+
 
 @users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserOutputTemplate)
 async def update_user(
@@ -102,7 +81,7 @@ async def update_user(
             UsersBase.id == user_id
         )
     )
-    
+
     response_data = await db.execute(stmt)
     response_data = response_data.scalar_one_or_none()
 
@@ -156,7 +135,7 @@ async def add_skill(
             SkillsBase.id == skill_id
         )
     )
-    
+
     skill_to_add = await db.execute(stmt)
     skill_to_add = skill_to_add.scalar_one_or_none()
 
@@ -186,7 +165,7 @@ async def delete_skill(
             UserSkillsAssociation.user_id == user_id,
             UserSkillsAssociation.skill_id == skill_id
         )
-    )    
+    )
 
     await db.execute(stmt)
     await db.commit()

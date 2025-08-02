@@ -1,47 +1,18 @@
 import logging
-from fastapi import (
-    APIRouter,
-    HTTPException,
-    Depends,
-    Header,
-    Response,
-    Security,
-    Query,
-    Path
-)
-from core.dependencies.auth import (
-    get_db,
-    get_current_user
-)
-from core.models.user_models import (
-    UsersBase,
-    SkillsBase,
-    UserSkillsAssociation,
-    ProjectRolesBase,
-    ProjectBase,
-    ProjectRolesBase,
-    ProjectRoleUsersAssociation
-)
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.responses import JSONResponse
 from typing import Annotated
-from sqlalchemy.orm import (
-    joinedload,
-    selectinload
-)
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, Security
+from fastapi.responses import JSONResponse
+from sqlalchemy import delete, desc, func, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
+
+from core.dependencies.auth import get_current_user, get_db
+from core.models.user_models import ProjectBase, ProjectRolesBase, UsersBase
 from core.schemas.pydantic_shcemas.project_schemas import (
-    ProjectTemplateV2,
+    NewProjectTemplate,
     ProjectTemplateShort,
-    NewProjectTemplate
-)
-from sqlalchemy import (
-    insert,
-    delete,
-    select,
-    or_,
-    update,
-    desc,
-    func
+    ProjectTemplateV2,
 )
 
 
@@ -65,7 +36,7 @@ async def create_project(
     await db.refresh(new_project)
 
     return new_project
-        
+
 
 
 @projects_router.get("/api/v1/projects", status_code = 200, response_model = list[ProjectTemplateV2])
@@ -79,9 +50,9 @@ async def get_projects(
     size = size if size else 10
 
     tsvector = (
-        func.to_tsvector('russian', ProjectBase.title + ' ' + ProjectBase.description)
+        func.to_tsvector("russian", ProjectBase.title + " " + ProjectBase.description)
     )
-    tsquery = func.plainto_tsquery('russian', query_filter)
+    tsquery = func.plainto_tsquery("russian", query_filter)
 
     rank = func.ts_rank(tsvector, tsquery)
     if query_filter:
@@ -94,7 +65,7 @@ async def get_projects(
                     .joinedload(ProjectRolesBase.role_types)
             )
             .where(
-                tsvector.op('@@')(tsquery)
+                tsvector.op("@@")(tsquery)
             )
             .order_by(
                 desc(rank)
@@ -147,8 +118,7 @@ async def retreive_project_by_id(
     response = response_model.scalar_one_or_none()
     if not response:
         raise HTTPException(detail = "There was no such project found", status_code = 404)
-    else:
-        return response
+    return response
 
 
 @projects_router.delete("/api/v1/projects/{project_id}", status_code = 204)
@@ -166,7 +136,7 @@ async def delete_project(
 
     if not project_data:
         raise HTTPException(status_code = 404, detail = "There is no project with such id")
-    elif project_data.creator_id != user_data.id:
+    if project_data.creator_id != user_data.id:
         raise HTTPException(status_code = 403, detail = "You are not allowed to delete someone else's projects")
 
     try:
@@ -178,7 +148,7 @@ async def delete_project(
         await db.commit()
         logging.info(data_on_delete)
         return Response(status_code = 204)
-    
+
     except Exception as e:
         logging.warning(e)
         raise HTTPException(
@@ -211,11 +181,11 @@ async def change_project(
     project_data = await db.execute(stmt)
 
     project_data_scalar = project_data.scalar_one_or_none()
-    
+
     if not project_data_scalar:
         raise HTTPException(status_code = 404, detail = "No project with such id was found")
-    elif project_data_scalar.creator_id != user_data.id:
-        raise HTTPException(status_code = 403, detail = "You are not allowed to change data in the project") 
+    if project_data_scalar.creator_id != user_data.id:
+        raise HTTPException(status_code = 403, detail = "You are not allowed to change data in the project")
 
     stmt = (
         update(
@@ -237,5 +207,4 @@ async def change_project(
 
     return project_data_scalar
 
-    
-    
+

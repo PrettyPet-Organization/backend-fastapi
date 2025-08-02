@@ -1,16 +1,9 @@
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
-    create_async_engine
-)
-from core.models.user_models import (
-    UsersBase
-)
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from core.config.db import DatabaseSettings
 from sqlalchemy.pool import NullPool
-from core.models.base import Base
-import asyncio
+
+from core.config.db import DatabaseSettings
 
 
 db_config = DatabaseSettings()

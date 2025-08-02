@@ -1,19 +1,13 @@
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
-    create_async_engine,
-    AsyncSession
-)
 from collections.abc import AsyncGenerator
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from core.config.db import DatabaseSettings
-from fastapi.testclient import TestClient
-from sqlalchemy.pool import NullPool
-from core.config import get_db
-from core.models.base import Base
-from main import app
-import pytest
 
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
+
+from core.config import get_db
+from core.config.db import DatabaseSettings
+from main import app
 
 
 db_config = DatabaseSettings()

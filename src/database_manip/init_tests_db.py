@@ -1,34 +1,22 @@
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
-    create_async_engine
-)
-from sqlalchemy import (
-    insert
-)
+from sqlalchemy import insert
+
+from core.models.base import Base
 from core.models.user_models import (
-    UsersBase,
-    SkillsBase,
-    RoleTypesBase,
     ProjectBase,
     ProjectRolesBase,
-    ProjectRoleSkillsAssociation
+    ProjectRoleSkillsAssociation,
+    RoleTypesBase,
+    SkillsBase,
+    UsersBase,
 )
-from .config import (
-    sync_session,
-    sync_test_engine
-)
-import asyncio
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from core.config.db import DatabaseSettings
-from sqlalchemy.pool import NullPool
-from core.models.base import Base
-from .raw_data.users_to_insert import new_users_list
-from .raw_data.skills_to_insert import new_skills_list
-from .raw_data.role_types_to_insert import new_role_types
-from .raw_data.projects_to_insert import new_projects
-from .raw_data.roles_to_insert import new_roles
+
+from .config import sync_session, sync_test_engine
 from .raw_data.new_skill_role_assosiation import new_skill_role_connection
+from .raw_data.projects_to_insert import new_projects
+from .raw_data.role_types_to_insert import new_role_types
+from .raw_data.roles_to_insert import new_roles
+from .raw_data.skills_to_insert import new_skills_list
+from .raw_data.users_to_insert import new_users_list
 
 
 def init_databases():

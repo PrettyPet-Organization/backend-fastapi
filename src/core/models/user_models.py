@@ -5,7 +5,13 @@ from fastapi import Depends
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, CreatedAtMixin, UpdatedAtMixin, get_str_field, get_str_field_nullable
+from .base import (
+    Base,
+    CreatedAtMixin,
+    UpdatedAtMixin,
+    get_str_field,
+    get_str_field_nullable,
+)
 
 
 class OauthAccountsBase(Base):
