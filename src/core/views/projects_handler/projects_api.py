@@ -10,7 +10,7 @@ from sqlalchemy.orm import joinedload, selectinload
 from core.dependencies.auth import get_current_user, get_db
 from core.models.user_models import ProjectBase, ProjectRolesBase, UsersBase
 from core.schemas.pydantic_shcemas.project_schemas import (
-    NewProjectTemplate,
+    BasicProjectTemplate,
     ProjectTemplateShort,
     ProjectTemplateWithRoles,
 )
@@ -23,7 +23,7 @@ projects_router = APIRouter(prefix = "/api/v1")
 async def create_project(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Security(get_current_user)],
-    new_project_data: NewProjectTemplate,
+    new_project_data: BasicProjectTemplate,
 ) -> ProjectBase:
     new_project = ProjectBase(
         **(new_project_data.model_dump()),
@@ -159,7 +159,7 @@ async def delete_project(
 
 @projects_router.put("/projects/{project_id}", status_code = 201, response_model = ProjectTemplateWithRoles)
 async def change_project(
-    new_project_data: NewProjectTemplate,
+    new_project_data: BasicProjectTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)],
     project_id: int = Path(ge=1)

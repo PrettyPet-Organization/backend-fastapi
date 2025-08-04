@@ -9,7 +9,7 @@ from .pydantic_mixins import (
 )
 
 
-class NewProjectTemplate(
+class BasicProjectTemplate(
     DecimalProjectMixin,
     ProjectEssentialsMixin,
     CamelBaseModel
