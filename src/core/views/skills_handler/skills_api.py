@@ -15,10 +15,10 @@ from core.models.user_models import (
 )
 
 
-skills_router = APIRouter()
+skills_router = APIRouter(prefix = "/api/v1")
 
 
-@skills_router.post("/api/v1/project_roles/{role_id}/skills/{skill_id}")
+@skills_router.post("/project_roles/{role_id}/skills/{skill_id}")
 async def skill_data(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)],
@@ -81,7 +81,7 @@ async def skill_data(
     )
 
 
-@skills_router.delete("/api/v1/project_roles/{role_id}/skills/{skill_id}", status_code = 204)
+@skills_router.delete("/project_roles/{role_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill_connection(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)],

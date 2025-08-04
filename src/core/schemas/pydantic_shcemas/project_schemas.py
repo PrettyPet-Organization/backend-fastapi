@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from core.schemas.base import CamelBaseModel
 
 from .extended_mixins import BasicRoleTemplate
 from .pydantic_mixins import (
@@ -12,41 +12,40 @@ from .pydantic_mixins import (
 class NewProjectTemplate(
     DecimalProjectMixin,
     ProjectEssentialsMixin,
-    BaseModel
+    CamelBaseModel
 ):
     pass
 
 
 class CreatorTemplate(
     IdMixin,
-    BaseModel
+    CamelBaseModel
 ):
     pass
 
 class RoleTemplate(
     RoleEssentialsMixin,
     IdMixin,
-    BaseModel
+    CamelBaseModel
 ):
     role_types: BasicRoleTemplate
-
-
-class ProjectTemplateV2(
-    DecimalProjectMixin,
-    ProjectEssentialsMixin,
-    IdMixin,
-    BaseModel
-):
-    creator_id: int | None
-    roles: list[RoleTemplate] | None
 
 
 class ProjectTemplateShort(
     DecimalProjectMixin,
     ProjectEssentialsMixin,
     IdMixin,
-    BaseModel
+    CamelBaseModel
 ):
     creator_id: int | None
+
+
+class ProjectTemplateWithRoles(
+    ProjectTemplateShort,
+    CamelBaseModel
+):
+    roles: list[RoleTemplate] | None
+
+
 
 

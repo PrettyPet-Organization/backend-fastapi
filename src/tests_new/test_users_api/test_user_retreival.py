@@ -12,9 +12,9 @@ from tests_new.basic_config import client
     ]
 )
 def test_retreive_correctly(
-    id,
-    expected_status_code
-):
+    id: int,
+    expected_status_code: int
+) -> None:
     response = client.get(
         f"/api/v1/users/{id}"
     )

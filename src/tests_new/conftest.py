@@ -41,7 +41,7 @@ def login_into_user(user_creds: dict) -> Response:
 
 
 @pytest.fixture(scope="session")
-def registered_user_data():
+def registered_user_data() -> dict:
     payload = {
         "email": "user@example.com",
         "password": "string"

@@ -16,13 +16,13 @@ from tests_new.basic_config import client
 )
 def test_project_role_put(
     registered_user_data: dict,
-    project_id,
-    role_id,
-    description,
-    required_skills_description,
-    number_of_needed,
-    expected_status_code
-):
+    project_id: int,
+    role_id: int,
+    description: str,
+    required_skills_description: str,
+    number_of_needed: str,
+    expected_status_code: int
+) -> None:
     payload = {
         "description": description,
         "required_skills_description": required_skills_description,

@@ -29,10 +29,10 @@ from core.schemas.pydantic_shcemas.role_schemas import (
 #     ...
 # )
 
-roles_router = APIRouter()
+roles_router = APIRouter(prefix = "/api/v1")
 
 
-@roles_router.post("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model=RoleOutputTemplate)
+@roles_router.post("/projects/{project_id}/roles/{role_id}", status_code = 201, response_model=RoleOutputTemplate)
 async def add_role_to_the_project(
     new_role_data: RoleInputTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -114,7 +114,7 @@ async def add_role_to_the_project(
 
 
 
-@roles_router.get("/api/v1/projects/{project_id}/roles", status_code = 200, response_model = list[RoleOutputTemplate])
+@roles_router.get("/projects/{project_id}/roles", status_code = 200, response_model = list[RoleOutputTemplate])
 async def get_project_roles(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)],
@@ -141,7 +141,7 @@ async def get_project_roles(
     return roles_data
 
 
-@roles_router.put("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = RoleExtendedOutputTemplate)
+@roles_router.put("/projects/{project_id}/roles/{role_id}", status_code = 201, response_model = RoleExtendedOutputTemplate)
 async def change_project_role(
     project_role_data: RoleInputTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -198,7 +198,7 @@ async def change_project_role(
 
 
 
-@roles_router.delete("/api/v1/projects/{project_id}/roles/{role_id}", status_code = 204)
+@roles_router.delete("/projects/{project_id}/roles/{role_id}", status_code = 204)
 async def delete_role(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)],

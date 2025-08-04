@@ -15,10 +15,10 @@ from tests_new.basic_config import client
 )
 def test_delete_role_project_connection(
     registered_user_data: dict,
-    project_id,
-    role_id,
-    expected_status_code
-):
+    project_id: int,
+    role_id: int,
+    expected_status_code: int
+) -> None:
     response = client.delete(
         f"/api/v1/projects/{project_id}/roles/{role_id}",
         headers = registered_user_data.get("jwt_auth"),

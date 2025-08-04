@@ -14,9 +14,9 @@ from tests_new.basic_config import client
 )
 def test_project_delete(
     registered_user_data: dict,
-    id,
-    expected_status_code
-):
+    id: int,
+    expected_status_code: int
+) -> None:
 
     response = client.delete(
         f"/api/v1/projects/{id}",

@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from core.schemas.base import CamelBaseModel
 
 from .extended_mixins import BasicLevelTemplate, BasicSkillsTemplate
 from .pydantic_mixins import BasicUserDataMixin, DateTimeMixin, EmailMixin, IdMixin
@@ -6,7 +8,7 @@ from .pydantic_mixins import BasicUserDataMixin, DateTimeMixin, EmailMixin, IdMi
 
 class SkillsWithMessageTemplate(
     BasicSkillsTemplate,
-    BaseModel
+    CamelBaseModel
 ):
     message: str = "Skill added successfully"
 
@@ -22,7 +24,7 @@ class UserOutputTemplate(
     EmailMixin,
     DateTimeMixin,
     IdMixin,
-    BaseModel
+    CamelBaseModel
 ):
 
     level: BasicLevelTemplate | None
@@ -33,6 +35,6 @@ class UserOutputTemplate(
 class PutUserTemplate(
     BasicUserDataMixin,
     EmailMixin,
-    BaseModel
+    CamelBaseModel
 ):
     pass

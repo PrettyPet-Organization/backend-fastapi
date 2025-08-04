@@ -17,10 +17,10 @@ from core.schemas.pydantic_shcemas.user_schemas import (
 )
 
 
-users_router = APIRouter()
+users_router = APIRouter(prefix = "/api/v1")
 
 
-@users_router.get("/api/v1/users/{users_id}", status_code = 200, response_model = UserOutputTemplate)
+@users_router.get("/users/{users_id}", status_code = 200, response_model = UserOutputTemplate)
 async def get_user(
     db: Annotated[AsyncSession, Depends(get_db)],
     users_id: int = Path(ge=1)
@@ -46,7 +46,7 @@ async def get_user(
     )
 
 
-@users_router.put("/api/v1/users/{user_id}", status_code = 201, response_model = UserOutputTemplate)
+@users_router.put("/users/{user_id}", status_code = 201, response_model = UserOutputTemplate)
 async def update_user(
     db: Annotated[AsyncSession, Depends(get_db)],
     data_to_update: PutUserTemplate,
@@ -91,7 +91,7 @@ async def update_user(
     return response_data
 
 
-@users_router.get("/api/v1/users/{user_id}/skills", status_code = 200, response_model = list[BasicSkillsTemplate])
+@users_router.get("/users/{user_id}/skills", status_code = 200, response_model = list[BasicSkillsTemplate])
 async def get_skills(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_id: int = Path(ge=1)
@@ -114,7 +114,7 @@ async def get_skills(
     return user_data.skills
 
 
-@users_router.post("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 201, response_model = SkillsWithMessageTemplate)
+@users_router.post("/users/{user_id}/skills/{skill_id}", status_code = 201, response_model = SkillsWithMessageTemplate)
 async def add_skill(
     user: Annotated[UsersBase, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -149,7 +149,7 @@ async def add_skill(
     return skill_to_add
 
 
-@users_router.delete("/api/v1/users/{user_id}/skills/{skill_id}", status_code = 204)
+@users_router.delete("/users/{user_id}/skills/{skill_id}", status_code = 204)
 async def delete_skill(
     user: Annotated[UsersBase, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],

@@ -12,14 +12,14 @@ from core.models.user_models import ProjectBase, ProjectRolesBase, UsersBase
 from core.schemas.pydantic_shcemas.project_schemas import (
     NewProjectTemplate,
     ProjectTemplateShort,
-    ProjectTemplateV2,
+    ProjectTemplateWithRoles,
 )
 
 
-projects_router = APIRouter()
+projects_router = APIRouter(prefix = "/api/v1")
 
 
-@projects_router.post("/api/v1/projects", status_code=201, response_model = ProjectTemplateShort)
+@projects_router.post("/projects", status_code=201, response_model = ProjectTemplateShort)
 async def create_project(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Security(get_current_user)],
@@ -39,7 +39,7 @@ async def create_project(
 
 
 
-@projects_router.get("/api/v1/projects", status_code = 200, response_model = list[ProjectTemplateV2])
+@projects_router.get("/projects", status_code = 200, response_model = list[ProjectTemplateWithRoles])
 async def get_projects(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge = 1),
@@ -50,9 +50,9 @@ async def get_projects(
     size = size if size else 10
 
     tsvector = (
-        func.to_tsvector("russian", ProjectBase.title + " " + ProjectBase.description)
+        func.to_tsvector("simple", ProjectBase.title + " " + ProjectBase.description)
     )
-    tsquery = func.plainto_tsquery("russian", query_filter)
+    tsquery = func.plainto_tsquery("simple", query_filter)
 
     rank = func.ts_rank(tsvector, tsquery)
     if query_filter:
@@ -92,7 +92,7 @@ async def get_projects(
     return projects_filtered_scalared
 
 
-@projects_router.get("/api/v1/projects/{project_id}", status_code = 200, response_model = ProjectTemplateV2)
+@projects_router.get("/projects/{project_id}", status_code = 200, response_model = ProjectTemplateWithRoles)
 async def retreive_project_by_id(
     db: Annotated[AsyncSession, Depends(get_db)],
     # user_data: Annotated[UsersBase, Depends(get_current_user)],
@@ -121,7 +121,7 @@ async def retreive_project_by_id(
     return response
 
 
-@projects_router.delete("/api/v1/projects/{project_id}", status_code = 204)
+@projects_router.delete("/projects/{project_id}", status_code = 204)
 async def delete_project(
     db: Annotated[AsyncSession, Depends(get_db)],
     user_data: Annotated[UsersBase, Depends(get_current_user)],
@@ -157,7 +157,7 @@ async def delete_project(
         )
 
 
-@projects_router.put("/api/v1/projects/{project_id}", status_code = 201, response_model = ProjectTemplateV2)
+@projects_router.put("/projects/{project_id}", status_code = 201, response_model = ProjectTemplateWithRoles)
 async def change_project(
     new_project_data: NewProjectTemplate,
     db: Annotated[AsyncSession, Depends(get_db)],

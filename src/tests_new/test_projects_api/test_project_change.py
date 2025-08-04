@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 
 from tests_new.basic_config import client
@@ -15,13 +17,13 @@ from tests_new.basic_config import client
 )
 def test_project_put(
     registered_user_data: dict,
-    id,
-    title,
-    description,
-    desired_fundraising_amount,
-    entry_ticket_price,
-    expected_status_code
-):
+    id: int,
+    title: str,
+    description: str,
+    desired_fundraising_amount: Decimal,
+    entry_ticket_price: Decimal,
+    expected_status_code: int
+) -> None:
 
     payload = {
         "title": title,

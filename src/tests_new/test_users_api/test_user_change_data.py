@@ -5,20 +5,6 @@ import pytest
 from tests_new.basic_config import client
 
 
-# @pytest.mark.parametrize(
-#         "email, full_name, bio, preferences, experience, expected_status_code",
-#         [
-#             ("userexample.com", "string", "string", "string", "string", 422),
-#             ("user@example.com", "s", "string", "string", "string", 422),
-#             ("user@example.com", "string", "s", "string", "string", 201),
-#             ("user@example.com", "string", "string", "s", "string", 422),
-#             ("user@example.com", "string", "string", "string", "s", 422),
-#             ("user@example.com", "", "", "", "", 422),
-#             ("user@example.com", "some long enough working data", "some new working long-enough data", "new data", "string", 201),
-#         ]
-# )
-
-
 @pytest.mark.parametrize(
         "id, email, full_name, bio, preferences, experience, expected_status_code",
         [
@@ -37,14 +23,14 @@ from tests_new.basic_config import client
 )
 def test_user_put(
     registered_user_data: dict,
-    id,
-    email,
-    full_name,
-    bio,
-    preferences,
-    experience,
-    expected_status_code
-):
+    id: int,
+    email: str,
+    full_name: str,
+    bio: str,
+    preferences: str,
+    experience: str,
+    expected_status_code: int
+) -> None:
     payload = {
         "email": email,
         "full_name": full_name,

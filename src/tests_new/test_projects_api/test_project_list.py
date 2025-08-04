@@ -14,11 +14,11 @@ from tests_new.basic_config import client
     ]
 )
 def test_project_list(
-    page,
-    size,
-    filter,
-    expected_status_code
-):
+    page: int | None,
+    size: int | None,
+    filter: str | None,
+    expected_status_code: int
+) -> None:
     query_params = {
         "page": page,
         "size": size,
