@@ -50,13 +50,14 @@ async def get_projects(
     page = pagination.page if pagination.page else 1
     size = pagination.size if pagination.size else 10
 
-    tsvector = (
-        func.to_tsvector("simple", ProjectBase.title + " " + ProjectBase.description)
-    )
-    tsquery = func.plainto_tsquery("simple", query_filter)
-
-    rank = func.ts_rank(tsvector, tsquery)
     if query_filter:
+        tsvector = (
+            func.to_tsvector("simple", ProjectBase.title + " " + ProjectBase.description)
+        )
+        tsquery = func.plainto_tsquery("simple", query_filter)
+
+        rank = func.ts_rank(tsvector, tsquery)
+        
         stmt = (
             select(
                 ProjectBase, rank.label("rank")
