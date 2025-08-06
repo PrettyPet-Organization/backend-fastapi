@@ -14,6 +14,7 @@ from core.schemas.pydantic_shcemas.project_schemas import (
     ProjectTemplateShort,
     ProjectTemplateWithRoles,
 )
+from utils.pagination_mixin import pagination_mixin
 
 
 projects_router = APIRouter(prefix = "/api/v1")
@@ -42,12 +43,11 @@ async def create_project(
 @projects_router.get("/projects", status_code = 200, response_model = list[ProjectTemplateWithRoles])
 async def get_projects(
     db: Annotated[AsyncSession, Depends(get_db)],
-    page: int = Query(1, ge = 1),
-    size: int = Query(10, ge=1, le=100),
+    pagination: dict = Depends(pagination_mixin),
     query_filter: str | None = ""
 ) -> ProjectBase:
-    page = page if page else 1
-    size = size if size else 10
+    page = pagination.get("page") if pagination.get("page") else 1
+    size = pagination.get("size") if pagination.get("size") else 10
 
     tsvector = (
         func.to_tsvector("simple", ProjectBase.title + " " + ProjectBase.description)
