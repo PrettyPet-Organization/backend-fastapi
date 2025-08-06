@@ -1,8 +1,3 @@
-# from core.schemas.project_patterns import (
-#     ProjectImputableTemplate,
-#     RoleInputTemplate,
-#     ExtendedProjectTemplate
-# )
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Response
