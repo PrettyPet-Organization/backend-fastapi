@@ -1,6 +1,6 @@
 import pytest
 
-from tests_new.basic_config import client
+from tests.basic_config import client
 
 
 @pytest.mark.parametrize(
@@ -8,13 +8,13 @@ from tests_new.basic_config import client
     [
         (50, 50, "s", "string", 1, 422),
         (50, 50, "string", "s", 1, 422),
-        (52, 50, "string", "string", 1, 403),
-        (50, 53, "string", "string", 1, 201),
-        (50, 50, "string", "string", 1, 409),
-        (50, 500, "string", "string", 1, 404),
+        (50, 50, "new_text", "new_text", 2, 201),
+        (50, 500, "string", "string", 2, 404),
+        (500, 50, "string", "string", 2, 404),
+        (50, 53, "string", "string", 2, 404),
     ]
 )
-def test_add_role_to_project(
+def test_project_role_put(
     registered_user_data: dict,
     project_id: int,
     role_id: int,
@@ -28,7 +28,8 @@ def test_add_role_to_project(
         "required_skills_description": required_skills_description,
         "number_of_needed": number_of_needed
     }
-    response = client.post(
+
+    response = client.put(
         f"/api/v1/projects/{project_id}/roles/{role_id}",
         headers = registered_user_data.get("jwt_auth"),
         json = payload
