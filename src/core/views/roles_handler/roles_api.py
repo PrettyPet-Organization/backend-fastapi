@@ -25,10 +25,6 @@ from core.schemas.pydantic_shcemas.role_schemas import (
 )
 
 
-# from core.schemas.pydantic_shcemas.user_schemas import (
-#     ...
-# )
-
 roles_router = APIRouter(prefix = "/api/v1")
 
 

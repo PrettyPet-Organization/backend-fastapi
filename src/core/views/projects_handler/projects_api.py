@@ -96,7 +96,6 @@ async def get_projects(
 @projects_router.get("/projects/{project_id}", status_code = 200, response_model = ProjectTemplateWithRoles)
 async def retreive_project_by_id(
     db: Annotated[AsyncSession, Depends(get_db)],
-    # user_data: Annotated[UsersBase, Depends(get_current_user)],
     project_id: int = Path(ge=1)
 ) -> ProjectBase:
     stmt = (
@@ -108,7 +107,6 @@ async def retreive_project_by_id(
                 .selectinload(ProjectRolesBase.role_types),
             selectinload(ProjectBase.roles)
                 .selectinload(ProjectRolesBase.users),
-            # joinedload(ProjectBase.creator)
         )
         .where(
             ProjectBase.id == project_id
