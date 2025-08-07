@@ -1,6 +1,6 @@
-"""Revision ID: 97f2e9fa8ef8
+"""Revision ID: 52f61cddb4a2
 Revises: 
-Create Date: 2025-07-01 03:19:11.062014
+Create Date: 2025-07-22 17:36:15.745691
 
 """
 from collections.abc import Sequence
@@ -11,7 +11,7 @@ from alembic import op
 
 
 # revision identifiers, used by Alembic.
-revision: str = "97f2e9fa8ef8"
+revision: str = "52f61cddb4a2"
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -39,10 +39,10 @@ def upgrade() -> None:
     sa.Column("email", sa.String(), nullable=False),
     sa.Column("password_hash", sa.String(), nullable=False),
     sa.Column("full_name", sa.String(), nullable=False),
-    sa.Column("bio", sa.String(), nullable=False),
-    sa.Column("preferences", sa.String(), nullable=False),
-    sa.Column("experience", sa.String(), nullable=False),
-    sa.Column("level_id", sa.Integer(), nullable=False),
+    sa.Column("bio", sa.String(), nullable=True),
+    sa.Column("preferences", sa.String(), nullable=True),
+    sa.Column("experience", sa.String(), nullable=True),
+    sa.Column("level_id", sa.Integer(), nullable=True),
     sa.Column("id", sa.Integer(), nullable=False),
     sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
     sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),

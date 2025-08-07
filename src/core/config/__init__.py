@@ -2,12 +2,13 @@ import os
 from collections.abc import AsyncGenerator
 
 import sqlalchemy
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from str2bool import str2bool_exc
+
 from core.config.db import DatabaseSettings
 from core.config.logging import LOGGING_CONFIG, logger
 from core.config.main import BASE_DIR, Settings
-from dotenv import load_dotenv
 
 
 load_dotenv()
