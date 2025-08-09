@@ -1,54 +1,67 @@
-import sys
-import asyncio
-
-if sys.platform.startswith("win"):
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+import logging
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.pool import NullPool
-from core.models.base import Base
-from main import app
-from core.dependencies.auth import get_db
+from requests import Response
 
-DATABASE_URL = "postgresql+asyncpg://postgres:admin@localhost:5432/test_db"
-
-test_engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
-TestingSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
+from .basic_config import client
 
 
-@pytest.fixture(scope="session", autouse=True)
-def event_loop():
-    """Override event loop for Windows compatibility."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+def get_registered_users_data(headers: dict) -> Response:
+    response = client.get(
+        "/auth/me",
+        headers = headers
+    )
+
+    logging.info(response.json())
+
+    return response
 
 
-@pytest.fixture(scope="session", autouse=True)
-def prepare_database(event_loop):
-    async def _init_db():
-        async with test_engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-            await conn.run_sync(Base.metadata.create_all)
-    event_loop.run_until_complete(_init_db())
-    yield
-    event_loop.run_until_complete(test_engine.dispose())
+def register_new_test_user(user_creds: dict) -> Response:
+    response = client.post(
+        "/auth/register",
+        json=user_creds
+    )
+
+    logging.info(response.json())
+
+    return response
 
 
-@pytest.fixture()
-def db_session():
-    async def _get_session():
-        async with TestingSessionLocal() as session:
-            yield session
+def login_into_user(user_creds: dict) -> Response:
+    response = client.post(
+        "/auth/login",
+        json = user_creds
+    )
 
-    session = asyncio.get_event_loop().run_until_complete(_get_session().__anext__())
-    return session
+    logging.info(response.json())
+
+    return response
 
 
-@pytest.fixture()
-def client(db_session):
-    app.dependency_overrides[get_db] = lambda: db_session
-    with TestClient(app) as client:
-        yield client
+
+@pytest.fixture(scope="session")
+def registered_user_data() -> dict:
+    payload = {
+        "email": "user@example.com",
+        "password": "string"
+    }
+    auth_data = login_into_user(payload)
+    headers = {
+        "Authorization": f"Bearer {auth_data.json().get('accessToken')}"
+    }
+    user_data = get_registered_users_data(headers)
+
+    user_creds = {
+        "jwt_auth": headers,
+        **user_data.json(),
+        **payload,
+        **auth_data.json()
+    }
+    logging.info(user_creds)
+
+    return user_creds
+
+
+
+

@@ -2,12 +2,13 @@ import os
 from collections.abc import AsyncGenerator
 
 import sqlalchemy
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from str2bool import str2bool_exc
+
 from core.config.db import DatabaseSettings
 from core.config.logging import LOGGING_CONFIG, logger
 from core.config.main import BASE_DIR, Settings
-from dotenv import load_dotenv
 
 
 load_dotenv()
@@ -34,9 +35,9 @@ db_url = sqlalchemy.URL.create(
 
 
 db_settings = DatabaseSettings(url=db_url, echo=True)
-settings = Settings(debug=DEBUG, db=db_settings)
+settings_config = Settings(debug=DEBUG, db=db_settings)
 
-async_db_engine = create_async_engine(settings.db.url, echo=settings.db.echo)
+async_db_engine = create_async_engine(settings_config.db.url, echo=settings_config.db.echo)
 async_db_session_factory = async_sessionmaker(async_db_engine)
 
 async def get_db() -> AsyncGenerator[AsyncSession]:
@@ -44,7 +45,7 @@ async def get_db() -> AsyncGenerator[AsyncSession]:
         yield session
 
 __all__ = (
-    "settings",
+    "settings_config",
     "BASE_DIR",
     "async_db_engine",
     "async_db_session_factory",

@@ -5,7 +5,13 @@ from fastapi import Depends
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, CreatedAtMixin, UpdatedAtMixin, get_str_field
+from .base import (
+    Base,
+    CreatedAtMixin,
+    UpdatedAtMixin,
+    get_str_field,
+    get_str_field_nullable,
+)
 
 
 class OauthAccountsBase(Base):
@@ -41,12 +47,12 @@ class ProjectRolesBase(Base):
     number_of_needed: Mapped[int]
 
     skills: Mapped[list["SkillsBase"]] = relationship(
-        secondary="project_role_skills", back_populates="project_roles"
+        secondary="project_role_skills", back_populates="roles"
     )
     role_types: Mapped["RoleTypesBase"] = relationship(back_populates="project_roles")
     project: Mapped["ProjectBase"] = relationship(back_populates="roles")
     users: Mapped[list["UsersBase"]] = relationship(
-        secondary="project_role_users", back_populates="project_roles"
+        secondary="project_role_users", back_populates="roles"
     )
 
 
@@ -59,7 +65,7 @@ class ProjectBase(Base, CreatedAtMixin, UpdatedAtMixin):
     entry_ticket_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    creator: Mapped["UsersBase"] = relationship(back_populates="project")
+    creator: Mapped["UsersBase"] = relationship(back_populates="projects")
     roles: Mapped[list["ProjectRolesBase"]] = relationship(back_populates="project")
 
 
@@ -69,7 +75,7 @@ class RoleTypesBase(Base):
     name: Mapped[Annotated[str, Depends(get_str_field)]]
 
     project_roles: Mapped[list["ProjectRolesBase"]] = relationship(
-        back_populates="role_type"
+        back_populates="role_types"
     )
 
 
@@ -77,12 +83,12 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "users"
 
     email: Mapped[Annotated[str, Depends(get_str_field)]]
-    password_hash: Mapped[Annotated[str, Depends(get_str_field)]]
-    full_name: Mapped[Annotated[str, Depends(get_str_field)]]
-    bio: Mapped[str]
-    preferences: Mapped[str]
-    experience: Mapped[str]
-    level_id: Mapped[int] = mapped_column(ForeignKey("levels.id"))
+    password_hash: Mapped[str]
+    full_name: Mapped[Annotated[str | None, Depends(get_str_field_nullable)]]
+    bio: Mapped[str | None] = mapped_column(nullable = True)
+    preferences: Mapped[str | None] = mapped_column(nullable = True)
+    experience: Mapped[str | None] = mapped_column(nullable = True)
+    level_id: Mapped[int | None] = mapped_column(ForeignKey("levels.id"), nullable = True)
 
     oauth_account: Mapped["OauthAccountsBase"] = relationship(back_populates="user")
     skills: Mapped[list["SkillsBase"]] = relationship(
