@@ -1,0 +1,2 @@
+0 0 * * * bash /usr/local/bin/backup >> ../backups/log.txt 2>&1
+5 0 * * * bash /usr/local/bin/backups_cleaner >> /backups/log.txt 2>&1

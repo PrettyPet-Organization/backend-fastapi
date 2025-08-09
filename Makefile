@@ -64,3 +64,11 @@ init-test-database:
 
 run-tests:
 	make init-test-database && uv run pytest .
+
+docker-postgres-create-backup:
+	 docker-compose -f docker-compose.yml --env-file .env exec backend-fastapi-postgres backup
+
+docker-postgres-restore:
+	cp ./restore.sql.gz ./backups
+	docker-compose -f docker-compose.yml --env-file .env exec backend-fastapi-postgres restore restore.sql.gz
+	rm ./backups/restore.sql.gz
