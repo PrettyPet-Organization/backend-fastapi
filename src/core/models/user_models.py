@@ -99,7 +99,8 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     roles: Mapped[list["ProjectRolesBase"]] = relationship(
         secondary="project_role_users", back_populates="users"
     )
-
+    user_role: Mapped[list["RolesBase"]] = relationship(back_populates = "users", secondary = "user_roles")
+ 
 
 class LevelsBase(Base):
     __tablename__ = "levels"
@@ -128,3 +129,18 @@ class ProjectRoleUsersAssociation(Base, CreatedAtMixin):
 
     project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"))
     users_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+
+class UserRolesAssociation(Base):
+    __tablename__ = "user_roles"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), server_default = "1")
+
+
+class RolesBase(Base):
+    __tablename__ = "roles"
+
+    name: Mapped[Annotated[str, Depends(get_str_field)]]
+
+    user: Mapped[list[UsersBase]] = relationship(back_populates = "user_roles", secondary = "user_roles")

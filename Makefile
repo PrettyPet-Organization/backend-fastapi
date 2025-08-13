@@ -60,7 +60,7 @@ docker-postgres-logs:
 	docker compose logs -f backend-fastapi-postgres
 
 init-test-database:
-	cd src && uv run -m database_manip.init_tests_db
+	cd src && uv run -m database_manip.manip_tests.init_tests_db
 
 run-tests:
 	make init-test-database && uv run pytest .
@@ -72,3 +72,6 @@ docker-postgres-restore:
 	cp ./restore.sql.gz ./backups
 	docker-compose -f docker-compose.yml --env-file .env exec backend-fastapi-postgres restore restore.sql.gz
 	rm ./backups/restore.sql.gz
+
+init-prod-db:
+	cd src && uv run -m database_manip.manip_prod.init_prod_db
