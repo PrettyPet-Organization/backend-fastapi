@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from datetime import datetime
 from .base import (
     Base,
     CreatedAtMixin,
@@ -64,9 +64,24 @@ class ProjectBase(Base, CreatedAtMixin, UpdatedAtMixin):
     desired_fundraising_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     entry_ticket_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[Annotated[str, Depends(get_str_field)]] = mapped_column(default = "pending")
+    approved_by_admin_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable = True)
+    approved_at: Mapped[datetime | None] = mapped_column(nullable = True)
+    rejection_reason_id: Mapped[int | None] = mapped_column(ForeignKey("rejection_reason.id"), nullable = True)
 
     creator: Mapped["UsersBase"] = relationship(back_populates="projects")
     roles: Mapped[list["ProjectRolesBase"]] = relationship(back_populates="project")
+    rejection_reason: Mapped["RejectionReasonBase"] = relationship(back_populates = "projects")
+    approved_by: Mapped["UsersBase"] = relationship(back_populates = "projects_approved")
+
+
+class RejectionReasonBase(Base, CreatedAtMixin, UpdatedAtMixin):
+    __tablename__ = "rejection_reason"
+
+    reason_text: Mapped[Annotated[str, Depends(get_str_field)]]
+    description: Mapped[str | None]
+    
+    projects: Mapped[list["ProjectBase"]] = relationship(back_populates = "rejection_reason")
 
 
 class RoleTypesBase(Base):
@@ -100,7 +115,8 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
         secondary="project_role_users", back_populates="users"
     )
     user_role: Mapped[list["RolesBase"]] = relationship(back_populates = "users", secondary = "user_roles")
- 
+    projects_approved: Mapped[list["ProjectBase"]] = relationship(back_populates = "approved_by")
+
 
 class LevelsBase(Base):
     __tablename__ = "levels"

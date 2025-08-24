@@ -16,9 +16,16 @@ from core.schemas.pydantic_shcemas.project_schemas import (
 )
 from core.schemas.pydantic_shcemas.pagination import PaginationTemplate
 from core.utils.pagination_mixin import pagination_mixin
+import asyncio
+from core.utils.send_email import send_email
+from dotenv import load_dotenv
+import os
+from core.static_data.new_project_body import new_project_mail_body
+from core.static_data.new_project_subject import new_project_mail_subject
 
 
 projects_router = APIRouter(prefix = "/api/v1")
+load_dotenv()
 
 
 @projects_router.post("/projects", status_code=201, response_model = ProjectTemplateShort)
@@ -36,6 +43,17 @@ async def create_project(
     await db.commit()
 
     await db.refresh(new_project)
+
+    message_body = await new_project_mail_body(new_project_data)
+    message_subject = await new_project_mail_subject(new_project_data)
+
+    asyncio.create_task(
+        send_email(
+            message_receiver = os.getenv("SENDER_EMAIL"),
+            message_body = message_body,
+            message_subject = message_subject
+        )
+    )
 
     return new_project
 
