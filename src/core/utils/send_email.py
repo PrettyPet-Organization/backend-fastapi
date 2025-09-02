@@ -5,13 +5,13 @@ import aiosmtplib
 import logging
 import os
 
+load_dotenv()
 
 async def send_email(
     message_receiver: str,
     message_body: str,
     message_subject: str
 ) -> bool:
-    load_dotenv()
 
     success = False
     

@@ -1,4 +1,4 @@
-from sqlalchemy import insert
+from sqlalchemy.dialects.postgresql import insert
 
 from core.models.base import Base
 from core.models.user_models import (
@@ -14,6 +14,9 @@ def init_databases():
         stmt1 = (
             insert(RolesBase)
             .values(new_roles_list)
+            .on_conflict_do_nothing(
+                index_elements=["id"]
+            )
         )
 
         session.execute(stmt1)

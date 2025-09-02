@@ -16,6 +16,7 @@ services:
       - ./backups:/backups:z
       - ./docker/postgres/entrypoint-wrapper.sh:/usr/local/bin/entrypoint-wrapper.sh
       - ./docker/postgres/start-cron.sh:/usr/local/bin/start-cron.sh
+      - ./docker/postgres/after_init:/doceker-entrypoint-initdb.d
     entrypoint: ["sh", "/usr/local/bin/entrypoint-wrapper.sh"]
 
 
@@ -28,7 +29,7 @@ services:
     ports:
       - "8000:8000"
     command: 
-      sh -c "make run"
+      sh -c "make init-prod-db && make run"
     volumes:
       - ./src:/backend-fastapi/src
       - ./Makefile:/backend-fastapi/Makefile
