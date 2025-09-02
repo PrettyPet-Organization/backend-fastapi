@@ -39,7 +39,10 @@ async def register(
     await db.commit()
     await db.refresh(new_user)
 
-    new_user_role = UserRolesAssociation(user_id = new_user.id)
+    new_user_role = UserRolesAssociation(
+        user_id = new_user.id
+    )
+    
     db.add(new_user_role)
     await db.commit()
 
