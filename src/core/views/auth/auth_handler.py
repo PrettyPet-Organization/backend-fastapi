@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 
 from core.config import get_db
 from core.dependencies.auth import get_current_user
-from core.models.user_models import UsersBase
+from core.models.user_models import UsersBase, UserRolesAssociation
 from core.schemas.user import UserCreate, UserLogin, UserRead
 from core.utils.jwt import create_access_token
 from core.utils.security import hash_password, verify_password
@@ -38,6 +38,13 @@ async def register(
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
+
+    new_user_role = UserRolesAssociation(
+        user_id = new_user.id
+    )
+    
+    db.add(new_user_role)
+    await db.commit()
 
     return new_user
 

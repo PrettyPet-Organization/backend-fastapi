@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from datetime import datetime
 from .base import (
     Base,
     CreatedAtMixin,
@@ -64,9 +64,24 @@ class ProjectBase(Base, CreatedAtMixin, UpdatedAtMixin):
     desired_fundraising_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     entry_ticket_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     creator_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[Annotated[str, Depends(get_str_field)]] = mapped_column(server_default = "pending")
+    approved_by_admin_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable = True)
+    approved_at: Mapped[datetime | None] = mapped_column(nullable = True)
+    rejection_reason_id: Mapped[int | None] = mapped_column(ForeignKey("rejection_reason.id"), nullable = True)
 
-    creator: Mapped["UsersBase"] = relationship(back_populates="projects")
+    creator: Mapped["UsersBase"] = relationship(foreign_keys = [creator_id], back_populates="projects")
     roles: Mapped[list["ProjectRolesBase"]] = relationship(back_populates="project")
+    rejection_reason: Mapped["RejectionReasonBase"] = relationship(back_populates = "projects")
+    approved_by: Mapped["UsersBase"] = relationship(back_populates = "projects_approved", foreign_keys=[approved_by_admin_id])
+
+
+class RejectionReasonBase(Base, CreatedAtMixin, UpdatedAtMixin):
+    __tablename__ = "rejection_reason"
+
+    reason_text: Mapped[Annotated[str, Depends(get_str_field)]]
+    description: Mapped[str | None]
+    
+    projects: Mapped[list["ProjectBase"]] = relationship(back_populates = "rejection_reason")
 
 
 class RoleTypesBase(Base):
@@ -95,10 +110,12 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
         secondary="user_skills", back_populates="users"
     )
     level: Mapped["LevelsBase"] = relationship(back_populates="users")
-    projects: Mapped[list["ProjectBase"]] = relationship(back_populates="creator")
+    projects: Mapped[list["ProjectBase"]] = relationship(back_populates="creator", foreign_keys = [ProjectBase.creator_id]) 
     roles: Mapped[list["ProjectRolesBase"]] = relationship(
         secondary="project_role_users", back_populates="users"
     )
+    user_role: Mapped[list["RolesBase"]] = relationship(back_populates = "user", secondary = "user_roles")
+    projects_approved: Mapped[list["ProjectBase"]] = relationship(back_populates = "approved_by", foreign_keys = [ProjectBase.approved_by_admin_id])
 
 
 class LevelsBase(Base):
@@ -128,3 +145,18 @@ class ProjectRoleUsersAssociation(Base, CreatedAtMixin):
 
     project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"))
     users_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+
+class UserRolesAssociation(Base):
+    __tablename__ = "user_roles"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), server_default = "1")
+
+
+class RolesBase(Base):
+    __tablename__ = "roles"
+
+    name: Mapped[Annotated[str, Depends(get_str_field)]]
+
+    user: Mapped[list[UsersBase]] = relationship(back_populates = "user_role", secondary = "user_roles")
