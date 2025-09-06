@@ -16,7 +16,7 @@ class User(Base):
     id: Mapped[UUIDPK] = mapped_column("user_id")
 
     email: Mapped[UniqueStr]
-    password_hash: Mapped[UniqueStr]
+    password_hash: Mapped[str]
     name: Mapped[str]
     bio: Mapped[str]
     created_at: Mapped[CreatedAt]
