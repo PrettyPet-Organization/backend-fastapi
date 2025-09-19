@@ -12,13 +12,14 @@ from core.models.user_models import UsersBase, UserRolesAssociation
 from core.schemas.user import UserCreate, UserLogin, UserRead
 from core.utils.jwt import create_access_token
 from core.utils.security import hash_password, verify_password
+from core.schemas.pydantic_shcemas.user_schemas import UserOutputTemplate
 
 
 auth_router = APIRouter()
 bearer_scheme = HTTPBearer()
 
 
-@auth_router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@auth_router.post("/register", response_model=UserOutputTemplate, status_code=status.HTTP_201_CREATED)
 async def register(
     user_create: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],

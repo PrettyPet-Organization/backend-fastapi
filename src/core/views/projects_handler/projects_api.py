@@ -44,17 +44,15 @@ async def create_project(
 
     await db.refresh(new_project)
 
-    message_body = await new_project_mail_body(new_project_data)
-    message_subject = await new_project_mail_subject(new_project_data)
+    message_body = await new_project_mail_body(new_project)
+    message_subject = await new_project_mail_subject(new_project)
 
-    asyncio.create_task(
-        send_email(
-            message_receiver = os.getenv("SENDER_EMAIL"),
-            message_body = message_body,
-            message_subject = message_subject
-        )
+    await send_email(
+        message_receiver = os.getenv("SENDER_EMAIL"),
+        message_body = message_body,
+        message_subject = message_subject
     )
-
+    
     return new_project
 
 
