@@ -1,15 +1,11 @@
 from core.schemas.pydantic_shcemas.project_schemas import BasicProjectTemplate 
-
+from core.models.user_models import ProjectBase
 
 async def new_project_mail_subject(
-    project_data: BasicProjectTemplate
+    project_data: ProjectBase
 ) -> str:
     
-    subject = (
-f"""
-New project pending: {project_data.title}
-"""
-    )
-
+    subject  = f"Новый проект: {project_data.title}"
+    
     return subject
 
