@@ -6,6 +6,15 @@ from .extended_mixins import BasicLevelTemplate, BasicSkillsTemplate
 from .pydantic_mixins import BasicUserDataMixin, DateTimeMixin, EmailMixin, IdMixin
 
 
+class UserOutputTrimmedTemplate(
+    BasicUserDataMixin,
+    EmailMixin,
+    DateTimeMixin,
+    IdMixin,
+    CamelBaseModel
+):
+    pass
+
 class SkillsWithMessageTemplate(
     BasicSkillsTemplate,
     CamelBaseModel
@@ -20,10 +29,7 @@ class SkillsWithRoleIDTemplate(
 
 
 class UserOutputTemplate(
-    BasicUserDataMixin,
-    EmailMixin,
-    DateTimeMixin,
-    IdMixin,
+    UserOutputTrimmedTemplate,
     CamelBaseModel
 ):
 
