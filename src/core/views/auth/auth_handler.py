@@ -40,26 +40,11 @@ async def register(
     await db.flush()
     await db.refresh(new_user)
 
-    new_user_id = new_user.id
-
     new_user_role = UserRolesAssociation(
-        user_id = new_user_id
+        user_id = new_user.id
     )
-        
     db.add(new_user_role)
     await db.commit()
-
-    stmt = (
-        select(
-            UsersBase
-        )
-        .where(
-            UsersBase.id == new_user_id
-        )
-    )
-
-    new_user = await db.execute(stmt)
-    new_user = new_user.scalar_one_or_none()
 
     return new_user
 

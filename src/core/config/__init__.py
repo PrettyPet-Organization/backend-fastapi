@@ -38,7 +38,7 @@ db_settings = DatabaseSettings(url=db_url, echo=True)
 settings_config = Settings(debug=DEBUG, db=db_settings)
 
 async_db_engine = create_async_engine(settings_config.db.url, echo=settings_config.db.echo)
-async_db_session_factory = async_sessionmaker(async_db_engine)
+async_db_session_factory = async_sessionmaker(async_db_engine, expire_on_commit=False)
 
 async def get_db() -> AsyncGenerator[AsyncSession]:
     async with async_db_session_factory() as session:
