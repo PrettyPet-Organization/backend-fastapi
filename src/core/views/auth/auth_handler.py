@@ -12,14 +12,14 @@ from core.models.user_models import UsersBase, UserRolesAssociation
 from core.schemas.user import UserCreate, UserLogin, UserRead
 from core.utils.jwt import create_access_token
 from core.utils.security import hash_password, verify_password
-from core.schemas.pydantic_shcemas.user_schemas import UserOutputTemplate
+from core.schemas.pydantic_shcemas.user_schemas import UserOutputTrimmedTemplate
 
 
 auth_router = APIRouter()
 bearer_scheme = HTTPBearer()
 
 
-@auth_router.post("/register", response_model=UserOutputTemplate, status_code=status.HTTP_201_CREATED)
+@auth_router.post("/register", response_model=UserOutputTrimmedTemplate, status_code=status.HTTP_201_CREATED)
 async def register(
     user_create: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -37,15 +37,29 @@ async def register(
         password_hash=hash_password(user_create.password),
     )
     db.add(new_user)
-    await db.commit()
+    await db.flush()
     await db.refresh(new_user)
 
+    new_user_id = new_user.id
+
     new_user_role = UserRolesAssociation(
-        user_id = new_user.id
+        user_id = new_user_id
     )
-    
+        
     db.add(new_user_role)
     await db.commit()
+
+    stmt = (
+        select(
+            UsersBase
+        )
+        .where(
+            UsersBase.id == new_user_id
+        )
+    )
+
+    new_user = await db.execute(stmt)
+    new_user = new_user.scalar_one_or_none()
 
     return new_user
 
