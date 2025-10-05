@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-
+# from .response_schemas import ApplicationResponseTemplate
 from pydantic import EmailStr, Field
 
 from core.schemas.base import CamelBaseModel
@@ -40,7 +40,10 @@ class DecimalProjectMixin(CamelBaseModel):
 class EmailMixin(CamelBaseModel):
     email: EmailStr
 
+
 class RoleEssentialsMixin(CamelBaseModel):
     description: str | None = Field(min_length = 6)
     required_skills_description: str | None = Field(min_length = 4)
     number_of_needed: int | None = Field(ge = 0)
+
+

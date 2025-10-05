@@ -16,16 +16,13 @@ from core.schemas.pydantic_shcemas.project_schemas import (
 )
 from core.schemas.pydantic_shcemas.pagination import PaginationTemplate
 from core.utils.pagination_mixin import pagination_mixin
-import asyncio
 from core.utils.send_email import send_email
-from dotenv import load_dotenv
 import os
 from core.static_data.new_project_body import new_project_mail_body
 from core.static_data.new_project_subject import new_project_mail_subject
 
 
 projects_router = APIRouter(prefix = "/api/v1")
-load_dotenv()
 
 
 @projects_router.post("/projects", status_code=201, response_model = ProjectTemplateShort)
