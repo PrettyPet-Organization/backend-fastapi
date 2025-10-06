@@ -241,3 +241,85 @@ async def review_application(
     await db.refresh(application)
 
     return application
+
+
+@approval_router.delete("/application/delete/{application_id}", response_model = ProjectRolesResponsesTemplate)
+async def resign_from_project(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user_data: Annotated[UsersBase, Depends(get_current_user)],
+    application_id: int
+):
+    stmt = (
+        select(
+            ProjectRoleResponseBase
+        )
+        .options(
+            joinedload(ProjectRoleResponseBase.project_role)
+                .joinedload(ProjectRolesBase.project)
+        )
+        .where(
+            ProjectRoleResponseBase.id == application_id 
+        )
+    )
+
+    application = await db.execute(stmt)
+    application = application.scalar_one_or_none()
+    
+    if not application:
+        raise HTTPException(
+            status_code=404,
+            detail = "There is no such application"
+        )
+    if user_data.id not in [application.project_role.project.creator_id, application.user_id]:
+        raise HTTPException(
+            status_code = 403,
+            detail = "Only the applied user and the project creator are allowed to delete the application"
+        )
+
+    if application.application_status == "approved":
+        stmt = (
+            delete(
+                ProjectRoleResponseBase
+            )
+            .where(
+                ProjectRoleResponseBase.id == application_id
+            )
+        )
+
+        await db.execute(stmt)
+        await db.flush()
+
+        stmt = (
+            update(
+                ProjectRolesBase
+            )
+            .values(
+                number_of_needed = application.project_role.number_of_needed + 1
+            )
+            .where(
+                ProjectRolesBase.id == application.project_role_id
+            )
+        )
+
+        await db.execute(stmt)
+        await db.commit()
+
+        return Response(
+            status_code = 204
+        )
+
+    else:
+        stmt = (
+            delete(
+                ProjectRoleResponseBase
+            )
+            .where(
+                ProjectRoleResponseBase.id == application_id
+            )
+        )
+        await db.execute(stmt)
+        await db.commit()
+
+        return Response(
+            status_code = 204
+        )
