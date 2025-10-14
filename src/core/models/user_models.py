@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import ForeignKey, Numeric
+from sqlalchemy import ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from .base import (
@@ -54,6 +54,9 @@ class ProjectRolesBase(Base):
     users: Mapped[list["UsersBase"]] = relationship(
         secondary="project_role_users", back_populates="roles"
     )
+    project_role_response: Mapped[list["ProjectRoleResponseBase"]] = relationship(
+        back_populates = "project_role" 
+    )
 
 
 class ProjectBase(Base, CreatedAtMixin, UpdatedAtMixin):
@@ -94,6 +97,29 @@ class RoleTypesBase(Base):
     )
 
 
+class ProjectRoleResponseBase(Base, CreatedAtMixin):
+    __tablename__ = "project_role_response"
+
+    project_role_id: Mapped[int] = mapped_column(ForeignKey("project_roles.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    application_status: Mapped[str | None] = mapped_column(String(255), nullable = True)
+    response_text: Mapped[str | None] = mapped_column(nullable = True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(nullable = True)
+    reviewed_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable = True)
+
+    project_role: Mapped["ProjectRolesBase"] = relationship(
+        back_populates = "project_role_response"
+    )
+    respondee: Mapped["UsersBase"] = relationship(
+        back_populates = "application_responses",
+        foreign_keys = [user_id]
+    )
+    approved_by: Mapped["UsersBase"] = relationship(
+        back_populates = "applications_approved",
+        foreign_keys = [reviewed_by_user_id]
+    )
+
+
 class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "users"
 
@@ -116,6 +142,14 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     )
     user_role: Mapped[list["RolesBase"]] = relationship(back_populates = "user", secondary = "user_roles")
     projects_approved: Mapped[list["ProjectBase"]] = relationship(back_populates = "approved_by", foreign_keys = [ProjectBase.approved_by_admin_id])
+    applications_approved: Mapped[list["ProjectRoleResponseBase"]] = relationship(
+        back_populates = "approved_by",
+        foreign_keys = [ProjectRoleResponseBase.reviewed_by_user_id]
+    )
+    application_responses: Mapped[list["ProjectRoleResponseBase"]] = relationship(
+        back_populates = "respondee",
+        foreign_keys = [ProjectRoleResponseBase.user_id]
+    )
 
 
 class LevelsBase(Base):
