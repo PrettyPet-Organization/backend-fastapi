@@ -1,7 +1,7 @@
 from core.schemas.base import CamelBaseModel
 
-from core.schemas.pydantic_shcemas.extended_mixins import BasicRoleTemplate
-from core.schemas.pydantic_shcemas.pydantic_mixins import (
+from core.schemas.pydantic_schemas.extended_mixins import BasicRoleTemplate
+from core.schemas.pydantic_schemas.pydantic_mixins import (
     DecimalProjectMixin,
     IdMixin,
     ProjectEssentialsMixin,

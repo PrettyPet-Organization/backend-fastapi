@@ -9,12 +9,12 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from core.dependencies.auth import get_current_user, get_db
 from core.models.user_models import ProjectBase, ProjectRolesBase, UsersBase
-from core.schemas.pydantic_shcemas.project_schemas import (
+from core.schemas.pydantic_schemas.project_schemas import (
     BasicProjectTemplate,
     ProjectTemplateShort,
     ProjectTemplateWithRoles,
 )
-from core.schemas.pydantic_shcemas.pagination import PaginationTemplate
+from core.schemas.pydantic_schemas.pagination import PaginationTemplate
 from core.utils.pagination_mixin import pagination_mixin
 from core.utils.send_email import send_email
 import os
@@ -49,7 +49,7 @@ async def create_project(
         message_body = message_body,
         message_subject = message_subject
     )
-    
+
     return new_project
 
 
@@ -70,7 +70,7 @@ async def get_projects(
         tsquery = func.plainto_tsquery("simple", query_filter)
 
         rank = func.ts_rank(tsvector, tsquery)
-        
+
         stmt = (
             select(
                 ProjectBase, rank.label("rank")
@@ -219,5 +219,3 @@ async def change_project(
     await db.refresh(project_data_scalar)
 
     return project_data_scalar
-
-

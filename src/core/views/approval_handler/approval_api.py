@@ -1,6 +1,6 @@
-from core.schemas.pydantic_shcemas.response_schemas import ApplicationResponseTemplate
-from core.schemas.pydantic_shcemas.project_schemas import ProjectRolesResponsesTemplate
-from core.schemas.pydantic_shcemas.action_schemas import ActionTemplate
+from core.schemas.pydantic_schemas.response_schemas import ApplicationResponseTemplate
+from core.schemas.pydantic_schemas.project_schemas import ProjectRolesResponsesTemplate
+from core.schemas.pydantic_schemas.action_schemas import ActionTemplate
 from typing import Annotated
 from core.models.user_models import (
     ProjectRoleUsersAssociation,
@@ -50,7 +50,7 @@ async def retreive_users_applications(
 
     stmt = (
         select(
-           ProjectRoleResponseBase 
+           ProjectRoleResponseBase
         )
         .where(
             ProjectRoleResponseBase.user_id == user_data.id
@@ -80,7 +80,7 @@ async def retrieve_project_applictaions(
             ProjectBase.id == project_id,
         )
     )
-    
+
     project_data = await db.execute(stmt)
     project_data = project_data.unique().scalar_one_or_none()
 
@@ -126,7 +126,7 @@ async def apply_for_a_position(
             status_code = 403,
             detail = "The project has no spare role for you"
         )
-    
+
     application = ProjectRoleResponseBase(
         project_role_id = role_id,
         user_id = user_data.id
@@ -170,7 +170,7 @@ async def review_application(
             status_code = 404,
             detail = "There is no application going by such id"
         )
-    
+
     if user_data.id != application.project_role.project.creator_id:
         raise HTTPException(
             status_code = 403,
@@ -212,8 +212,8 @@ async def review_application(
                     application_status = "approved",
                     response_text = action.response_text,
                     reviewed_at = datetime.now(),
-                    reviewed_by_user_id = user_data.id 
-                )   
+                    reviewed_by_user_id = user_data.id
+                )
             )
         case "decline":
             stmt = (
@@ -227,7 +227,7 @@ async def review_application(
                     application_status = "declined",
                     response_text = action.response_text,
                     reviewed_at = datetime.now(),
-                    reviewed_by_user_id = user_data.id 
+                    reviewed_by_user_id = user_data.id
                 )
             )
         case _:
@@ -235,7 +235,7 @@ async def review_application(
                 status_code = 400,
                 detail = "Incorrect action"
             )
-        
+
     await db.execute(stmt)
     await db.commit()
     await db.refresh(application)
@@ -258,13 +258,13 @@ async def resign_from_project(
                 .joinedload(ProjectRolesBase.project)
         )
         .where(
-            ProjectRoleResponseBase.id == application_id 
+            ProjectRoleResponseBase.id == application_id
         )
     )
 
     application = await db.execute(stmt)
     application = application.scalar_one_or_none()
-    
+
     if not application:
         raise HTTPException(
             status_code=404,
