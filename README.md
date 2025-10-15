@@ -18,8 +18,16 @@
    DOTENV_MODE=true uvicorn main:app
    ```
    from root dir
-   
-   **If you use `uv`:**
+
+   **Docker**
     ```bash
     make docker-run
     ```
+    if Dockerfile was changed:
+    ```bash
+    docker-run-build
+    ```
+
+#### Access points
+* Service will be available at `http://localhost:8000`
+* Swagger: `http://localhost:8000/docs#/`
