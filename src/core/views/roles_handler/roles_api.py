@@ -13,7 +13,7 @@ from core.models.user_models import (
     RoleTypesBase,
     UsersBase,
 )
-from core.schemas.pydantic_shcemas.role_schemas import (
+from core.schemas.pydantic_schemas.role_schemas import (
     RoleExtendedOutputTemplate,
     RoleInputTemplate,
     RoleOutputTemplate,

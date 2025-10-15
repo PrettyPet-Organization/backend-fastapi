@@ -8,8 +8,8 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from core.dependencies.auth import get_current_user, get_db
 from core.models.user_models import SkillsBase, UsersBase, UserSkillsAssociation
-from core.schemas.pydantic_shcemas.extended_mixins import BasicSkillsTemplate
-from core.schemas.pydantic_shcemas.user_schemas import (
+from core.schemas.pydantic_schemas.extended_mixins import BasicSkillsTemplate
+from core.schemas.pydantic_schemas.user_schemas import (
     PutUserTemplate,
     SkillsWithMessageTemplate,
     UserOutputTemplate,

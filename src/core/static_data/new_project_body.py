@@ -1,4 +1,4 @@
-from core.schemas.pydantic_shcemas.project_schemas import BasicProjectTemplate 
+from core.schemas.pydantic_schemas.project_schemas import BasicProjectTemplate
 from core.models.user_models import ProjectBase
 
 async def new_project_mail_body(
@@ -11,5 +11,5 @@ async def new_project_mail_body(
     new_project_message += f"Цена участия: {project_data.entry_ticket_price}\n"
     new_project_message += f"Цена приблизительная: {project_data.desired_fundraising_amount}\n\n"
     new_project_message += f"Время создания проекта: {project_data.created_at}"
-    
+
     return new_project_message

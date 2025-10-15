@@ -1,4 +1,4 @@
-from core.schemas.pydantic_shcemas.pagination import PaginationTemplate
+from core.schemas.pydantic_schemas.pagination import PaginationTemplate
 from fastapi import Query
 
 
@@ -8,4 +8,3 @@ async def pagination_mixin(
 ):
     pagination_data = PaginationTemplate(page = page, size = size)
     return pagination_data
-
