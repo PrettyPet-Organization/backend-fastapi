@@ -18,18 +18,26 @@ services:
       - ./docker/postgres/start-cron.sh:/usr/local/bin/start-cron.sh
       - ./docker/postgres/after_init:/doceker-entrypoint-initdb.d
     entrypoint: ["sh", "/usr/local/bin/entrypoint-wrapper.sh"]
-
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER_NAME} -d ${PG_DATABASE_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   backend-fastapi:
+    depends_on:
+      backend-fastapi-postgres:
+        condition: service_healthy
+        restart: true
     env_file:
       - .env
     build:
       context: .
     ports:
       - "8000:8000"
-    command: 
-      sh -c "make init-prod-db && make run"
+    command:
+      sh -c "make migrate && make init-prod-db && make run"
     volumes:
       - ./src:/backend-fastapi/src
       - ./Makefile:/backend-fastapi/Makefile
