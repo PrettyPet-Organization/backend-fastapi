@@ -1,14 +1,11 @@
-from core.schemas.base import CamelBaseModel
-
-from .pydantic_mixins import (
-    IdMixin,
-)
 from datetime import datetime
 
-class ApplicationResponseTemplate(
-    IdMixin,
-    CamelBaseModel
-):
+from core.schemas.base import CamelBaseModel
+
+from .pydantic_mixins import IdMixin
+
+
+class ApplicationResponseTemplate(IdMixin, CamelBaseModel):
     project_role_id: int | None
     user_id: int | None
     application_status: str | None
@@ -20,6 +17,7 @@ class ApplicationResponseTemplate(
 class TokenResponse(CamelBaseModel):
     access_token: str
     token_type: str
+
 
 class ErrorResponse(CamelBaseModel):
     detail: str

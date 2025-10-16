@@ -1,5 +1,7 @@
-from pydantic import Field
 from enum import Enum
+
+from pydantic import Field
+
 from core.schemas.base import CamelBaseModel
 
 

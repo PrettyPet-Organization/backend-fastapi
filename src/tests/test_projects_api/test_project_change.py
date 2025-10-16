@@ -13,7 +13,7 @@ from tests.basic_config import client
         (50, "string", "string", 0, 0, 201),
         (52, "string", "string", 0, 0, 403),
         (500, "string", "string", 0, 0, 404),
-    ]
+    ],
 )
 def test_project_put(
     registered_user_data: dict,
@@ -22,19 +22,19 @@ def test_project_put(
     description: str,
     desired_fundraising_amount: Decimal,
     entry_ticket_price: Decimal,
-    expected_status_code: int
+    expected_status_code: int,
 ) -> None:
 
     payload = {
         "title": title,
         "description": description,
         "desired_fundraising_amount": desired_fundraising_amount,
-        "entry_ticket_price": entry_ticket_price
+        "entry_ticket_price": entry_ticket_price,
     }
     response = client.put(
         f"/api/v1/projects/{id}",
-        headers = registered_user_data.get("jwt_auth"),
-        json = payload
+        headers=registered_user_data.get("jwt_auth"),
+        json=payload,
     )
 
     assert response.status_code == expected_status_code

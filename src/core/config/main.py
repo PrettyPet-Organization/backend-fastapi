@@ -4,7 +4,6 @@ import pydantic_settings
 
 from core.config.db import DatabaseSettings
 
-
 BASE_DIR = Path(__file__).parent.parent.parent  # ./src/
 
 

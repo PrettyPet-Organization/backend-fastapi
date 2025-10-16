@@ -15,6 +15,7 @@ class UserRead(CamelBaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class UserLogin(CamelBaseModel):
     email: EmailStr
     password: str

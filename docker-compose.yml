@@ -32,6 +32,8 @@ services:
         restart: true
     env_file:
       - .env
+    environment:
+      - FLASK_ENV=development
     build:
       context: .
     ports:
@@ -42,6 +44,7 @@ services:
       - ./src:/backend-fastapi/src
       - ./Makefile:/backend-fastapi/Makefile
       - ./pyproject.toml:/backend-fastapi/pyproject.toml
+    restart: unless-stopped
 
   smtp-server:
     image: mailhog/mailhog
@@ -53,7 +56,7 @@ services:
 
   portainer:
     image: portainer/portainer-ce:latest
-    container_name: mail_portainer
+    container_name: portainer
     ports:
       - "9443:9443"
       - "9000:9000"
@@ -66,3 +69,4 @@ services:
 
 volumes:
   postgres_data:
+  portainer_data:

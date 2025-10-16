@@ -1,6 +1,5 @@
 from core.utils.security import hash_password
 
-
 new_users_list = [
     {
         "id": 50,
@@ -9,7 +8,7 @@ new_users_list = [
         "full_name": "string",
         "bio": "string",
         "preferences": "string",
-        "experience": "string"
+        "experience": "string",
     },
     {
         "id": 51,
@@ -18,7 +17,7 @@ new_users_list = [
         "full_name": "string",
         "bio": "string",
         "preferences": "string",
-        "experience": "string"
+        "experience": "string",
     },
     {
         "id": 52,
@@ -27,6 +26,6 @@ new_users_list = [
         "full_name": "string",
         "bio": "string",
         "preferences": "string",
-        "experience": "string"
-    }
+        "experience": "string",
+    },
 ]

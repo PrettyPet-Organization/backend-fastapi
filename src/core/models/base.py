@@ -20,6 +20,7 @@ class UpdatedAtMixin:
         ]
     ]
 
+
 class AssignedAtMixin:
     assigned_at: Mapped[Annotated[datetime, mapped_column(server_default=func.now())]]
 
@@ -50,7 +51,5 @@ def get_str_field(
     return mapped_column(String(length=length, collation=collation))
 
 
-def get_str_field_nullable(
-    length: int | None = 256, collation: str | None = None
-):
-    return mapped_column(String(length=length, collation=collation, nullable = True))
+def get_str_field_nullable(length: int | None = 256, collation: str | None = None):
+    return mapped_column(String(length=length, collation=collation, nullable=True))

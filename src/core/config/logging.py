@@ -4,7 +4,6 @@ from pathlib import Path
 
 from core.config.main import BASE_DIR
 
-
 LOGS_DIR = BASE_DIR / "logs"
 
 # Create a directory if it doesn't exist

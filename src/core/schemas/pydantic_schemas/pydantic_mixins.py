@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+
 # from .response_schemas import ApplicationResponseTemplate
 from pydantic import EmailStr, Field
 
@@ -16,25 +17,27 @@ class DateTimeMixin(CamelBaseModel):
 
 
 class BasicUserDataMixin(CamelBaseModel):
-    full_name: str | None = Field(min_length = 4, max_length = 255)
+    full_name: str | None = Field(min_length=4, max_length=255)
     bio: str | None
-    preferences: str | None = Field(min_length = 4, max_length = 1000)
-    experience: str | None = Field(min_length = 4, max_length = 1000)
+    preferences: str | None = Field(min_length=4, max_length=1000)
+    experience: str | None = Field(min_length=4, max_length=1000)
 
 
 class RoleTypeMixin(CamelBaseModel):
-    id: int = Field(ge = 1)
-    name: str = Field(max_length = 255)
+    id: int = Field(ge=1)
+    name: str = Field(max_length=255)
 
 
 class ProjectEssentialsMixin(CamelBaseModel):
-    title: str | None = Field(min_length = 4, max_length = 255)
-    description: str | None = Field(min_length = 4, max_length = 1000)
+    title: str | None = Field(min_length=4, max_length=255)
+    description: str | None = Field(min_length=4, max_length=1000)
 
 
 class DecimalProjectMixin(CamelBaseModel):
-    desired_fundraising_amount: Decimal | None = Field(ge = 0, decimal_places = 2, max_digits = 10)
-    entry_ticket_price: Decimal | None = Field(ge = 0, decimal_places = 2, max_digits = 10)
+    desired_fundraising_amount: Decimal | None = Field(
+        ge=0, decimal_places=2, max_digits=10
+    )
+    entry_ticket_price: Decimal | None = Field(ge=0, decimal_places=2, max_digits=10)
 
 
 class EmailMixin(CamelBaseModel):
@@ -42,8 +45,6 @@ class EmailMixin(CamelBaseModel):
 
 
 class RoleEssentialsMixin(CamelBaseModel):
-    description: str | None = Field(min_length = 6)
-    required_skills_description: str | None = Field(min_length = 4)
-    number_of_needed: int | None = Field(ge = 0)
-
-
+    description: str | None = Field(min_length=6)
+    required_skills_description: str | None = Field(min_length=4)
+    number_of_needed: int | None = Field(ge=0)

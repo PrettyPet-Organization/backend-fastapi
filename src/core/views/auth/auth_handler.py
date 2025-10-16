@@ -5,27 +5,34 @@ from fastapi.security import HTTPBearer
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.config import get_db
+from core.config.db import get_db
 from core.dependencies.auth import get_current_user
 from core.models.user_models import UserRolesAssociation, UsersBase
-from core.schemas.pydantic_schemas.user_schemas import UserOutputTrimmedTemplate
+from core.schemas.pydantic_schemas.response_schemas import (ErrorResponse,
+                                                            TokenResponse)
+from core.schemas.pydantic_schemas.user_schemas import \
+    UserOutputTrimmedTemplate
 from core.schemas.user import UserCreate, UserLogin, UserRead
 from core.utils.jwt import create_access_token
 from core.utils.security import hash_password, verify_password
-from core.schemas.pydantic_schemas.response_schemas import TokenResponse, ErrorResponse
-
 
 auth_router = APIRouter()
 bearer_scheme = HTTPBearer()
 
 
-@auth_router.post("/register", response_model=UserOutputTrimmedTemplate, status_code=status.HTTP_201_CREATED)
+@auth_router.post(
+    "/register",
+    response_model=UserOutputTrimmedTemplate,
+    status_code=status.HTTP_201_CREATED,
+)
 async def register(
     user_create: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> UsersBase:
     """Registration of a new user."""
-    user_exists = await db.scalar(select(exists().where(UsersBase.email == user_create.email)))
+    user_exists = await db.scalar(
+        select(exists().where(UsersBase.email == user_create.email))
+    )
     if user_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -40,28 +47,37 @@ async def register(
     await db.flush()
     await db.refresh(new_user)
 
-    new_user_role = UserRolesAssociation(
-        user_id = new_user.id
-    )
+    new_user_role = UserRolesAssociation(user_id=new_user.id)
     db.add(new_user_role)
     await db.commit()
 
     return new_user
 
 
-@auth_router.post("/login", response_model=TokenResponse,
-                  responses={status.HTTP_401_UNAUTHORIZED: {"model":ErrorResponse,
-                                                            "description": "Invalid credentials"}})
+@auth_router.post(
+    "/login",
+    response_model=TokenResponse,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorResponse,
+            "description": "Invalid credentials",
+        }
+    },
+)
 async def login(
     user_data: UserLogin,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
     """User authentication and issuing of a JWT token."""
-    result = await db.execute(select(UsersBase).where(UsersBase.email == user_data.email))
+    result = await db.execute(
+        select(UsersBase).where(UsersBase.email == user_data.email)
+    )
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(user_data.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
 
     token = create_access_token(data={"sub": str(user.id)})
 
@@ -70,7 +86,7 @@ async def login(
 
 @auth_router.get("/me", dependencies=[Security(bearer_scheme)], response_model=UserRead)
 async def read_current_user(
-    current_user: Annotated[UsersBase, Depends(get_current_user)]
+    current_user: Annotated[UsersBase, Depends(get_current_user)],
 ) -> UsersBase:
     """Retrieve information about the current user."""
     return current_user

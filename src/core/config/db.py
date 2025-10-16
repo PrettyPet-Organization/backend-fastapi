@@ -1,8 +1,22 @@
+import os
 from collections.abc import AsyncGenerator
 
 import sqlalchemy
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
+from str2bool import str2bool_exc
+
+load_dotenv()
+
+DOTENV_MODE = str2bool_exc(os.getenv("DOTENV_MODE", "false"))
+pg_internal_host = "localhost" if DOTENV_MODE else os.environ["PG_INTERNAL_HOST"]
+DEBUG = str2bool_exc(os.environ["DEBUG"])
+PG_DATABASE_NAME = os.environ["PG_DATABASE_NAME"]
+PG_USER_NAME = os.environ["PG_USER_NAME"]
+PG_USER_PASSWORD = os.environ["PG_USER_PASSWORD"]
+PG_INTERNAL_PORT = int(os.environ["PG_INTERNAL_PORT"])
 
 
 class DatabaseSettings(BaseSettings):
@@ -26,7 +40,9 @@ class DatabaseSettings(BaseSettings):
         if not self.url:
             self.url = self.__new_url_with_custom_name(self.PG_DATABASE_NAME)
         if not self.url_tests:
-            self.url_tests = self.__new_url_with_custom_name(self.PG_DATABASE_TESTS_NAME)
+            self.url_tests = self.__new_url_with_custom_name(
+                self.PG_DATABASE_TESTS_NAME
+            )
 
     def __new_url_with_custom_name(self, db_name):
         url = sqlalchemy.engine.URL.create(
@@ -39,6 +55,7 @@ class DatabaseSettings(BaseSettings):
         )
 
         return url
+
 
 db_settings = DatabaseSettings()
 

@@ -1,13 +1,21 @@
 import asyncio
+import logging
+import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.config import settings_config
+from core.config.db import db_settings
 from core.routing import router as core_router
 
+# Базовая настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
+)
 
-app = FastAPI(debug=settings_config.debug, title="PrettyPet API")
+app = FastAPI(debug=db_settings.echo, title="PrettyPet API")
 app.include_router(core_router)
 
 app.add_middleware(
@@ -18,17 +26,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# I'm not sure if we need this block.
+
 async def main() -> None:
     import uvicorn
 
-    from core.config import LOGGING_CONFIG
-
     uvicorn.run(
-        "main:app",
-        host="0.0.0.0",  # noqa: S104
-        reload=settings_config.debug,
-        log_config=LOGGING_CONFIG,
+        "main:app", host="0.0.0.0", port=8000, reload=db_settings.echo, log_level="info"
     )
 
 

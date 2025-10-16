@@ -1,14 +1,9 @@
 from sqlalchemy import insert
 
 from core.models.base import Base
-from core.models.user_models import (
-    ProjectBase,
-    ProjectRolesBase,
-    ProjectRoleSkillsAssociation,
-    RoleTypesBase,
-    SkillsBase,
-    UsersBase,
-)
+from core.models.user_models import (ProjectBase, ProjectRolesBase,
+                                     ProjectRoleSkillsAssociation,
+                                     RoleTypesBase, SkillsBase, UsersBase)
 
 from .config import sync_session, sync_test_engine
 from .raw_data.new_skill_role_assosiation import new_skill_role_connection
@@ -24,30 +19,12 @@ def init_databases():
     Base.metadata.create_all(sync_test_engine)
 
     with sync_session() as session:
-        stmt1 = (
-            insert(UsersBase)
-            .values(new_users_list)
-        )
-        stmt2 = (
-            insert(SkillsBase)
-            .values(new_skills_list)
-        )
-        stmt3 = (
-            insert(RoleTypesBase)
-            .values(new_role_types)
-        )
-        stmt4 = (
-            insert(ProjectBase)
-            .values(new_projects)
-        )
-        stmt5 = (
-            insert(ProjectRolesBase)
-            .values(new_roles)
-        )
-        stmt6 = (
-            insert(ProjectRoleSkillsAssociation)
-            .values(new_skill_role_connection)
-        )
+        stmt1 = insert(UsersBase).values(new_users_list)
+        stmt2 = insert(SkillsBase).values(new_skills_list)
+        stmt3 = insert(RoleTypesBase).values(new_role_types)
+        stmt4 = insert(ProjectBase).values(new_projects)
+        stmt5 = insert(ProjectRolesBase).values(new_roles)
+        stmt6 = insert(ProjectRoleSkillsAssociation).values(new_skill_role_connection)
         session.execute(stmt1)
         session.execute(stmt2)
         session.execute(stmt3)

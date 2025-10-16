@@ -6,7 +6,8 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, ForeignKeyConstraint, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models._base import UUIDPK, Base, CreatedAt, IntPK, UniqueStr, UpdatedAt
+from src.models._base import (UUIDPK, Base, CreatedAt, IntPK, UniqueStr,
+                              UpdatedAt)
 from src.models.types_ import SkillLevel
 
 

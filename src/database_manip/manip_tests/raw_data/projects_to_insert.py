@@ -1,5 +1,3 @@
-
-
 new_projects = [
     {
         "id": 50,
@@ -7,7 +5,7 @@ new_projects = [
         "description": "string",
         "desired_fundraising_amount": 0,
         "entry_ticket_price": 0,
-        "creator_id": 50
+        "creator_id": 50,
     },
     {
         "id": 51,
@@ -15,7 +13,7 @@ new_projects = [
         "description": "string",
         "desired_fundraising_amount": 0,
         "entry_ticket_price": 0,
-        "creator_id": 50
+        "creator_id": 50,
     },
     {
         "id": 52,
@@ -23,7 +21,6 @@ new_projects = [
         "description": "string",
         "desired_fundraising_amount": 0,
         "entry_ticket_price": 0,
-        "creator_id": 52
-    }
-
+        "creator_id": 52,
+    },
 ]

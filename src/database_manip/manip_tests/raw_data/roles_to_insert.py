@@ -1,6 +1,3 @@
-
-
-
 new_roles = [
     {
         "id": 50,
@@ -8,7 +5,7 @@ new_roles = [
         "project_id": 50,
         "description": "string",
         "required_skills_description": "string",
-        "number_of_needed": 4
+        "number_of_needed": 4,
     },
     {
         "id": 51,
@@ -16,7 +13,7 @@ new_roles = [
         "project_id": 50,
         "description": "string",
         "required_skills_description": "string",
-        "number_of_needed": 4
+        "number_of_needed": 4,
     },
     {
         "id": 52,
@@ -24,7 +21,7 @@ new_roles = [
         "project_id": 50,
         "description": "string",
         "required_skills_description": "string",
-        "number_of_needed": 4
+        "number_of_needed": 4,
     },
     {
         "id": 53,
@@ -32,6 +29,6 @@ new_roles = [
         "project_id": 52,
         "description": "string",
         "required_skills_description": "string",
-        "number_of_needed": 4
-    }
+        "number_of_needed": 4,
+    },
 ]
