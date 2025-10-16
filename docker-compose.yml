@@ -43,5 +43,26 @@ services:
       - ./Makefile:/backend-fastapi/Makefile
       - ./pyproject.toml:/backend-fastapi/pyproject.toml
 
+  smtp-server:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"  # Web UI порт
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: mail_portainer
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+
 volumes:
   postgres_data:
