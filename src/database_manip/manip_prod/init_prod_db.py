@@ -1,24 +1,13 @@
-from sqlalchemy.dialects.postgresql import insert
+from core.config.db import DatabaseSettings
 
-from core.models.base import Base
-from core.models.user_models import RolesBase
+db_config = DatabaseSettings()
 
-from .config import sync_session, sync_test_engine
-from .raw_data.new_roles import new_roles_list
+DATABASE_URL = db_config.url
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-def init_databases():
+sync_engine = create_engine(DATABASE_URL.replace("postgresql+asyncpg", "postgresql+psycopg"))
+sync_session = sessionmaker(bind=sync_engine)
 
-    with sync_session() as session:
-        stmt1 = (
-            insert(RolesBase)
-            .values(new_roles_list)
-            .on_conflict_do_nothing(index_elements=["id"])
-        )
-
-        session.execute(stmt1)
-        session.commit()
-
-
-if __name__ == "__main__":
-    init_databases()
+sync_test_engine = create_engine(db_config.url_tests.replace("postgresql+asyncpg", "postgresql+psycopg"))

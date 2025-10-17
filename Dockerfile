@@ -4,6 +4,7 @@ WORKDIR /backend-fastapi
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 ENV PATH="/root/.local/bin:${PATH}"
+ENV UV_HTTP_TIMEOUT=120
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

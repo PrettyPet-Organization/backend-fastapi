@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import sys
 
@@ -7,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config.db import db_settings
 from core.routing import router as core_router
+from core.config.logging import LOGGING_CONFIG, logger
 
 # Базовая настройка логирования
 logging.basicConfig(
@@ -26,14 +26,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-async def main() -> None:
-    import uvicorn
-
-    uvicorn.run(
-        "main:app", host="0.0.0.0", port=8000, reload=db_settings.echo, log_level="info"
-    )
+logger.info("Application started successfully")
+logger.info(f"Debug mode: {db_settings.echo}")
+logger.info("CORS middleware configured for all origins")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import uvicorn
+
+    logger.info("Starting uvicorn server directly from main.py")
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        reload=db_settings.echo,
+        log_config=LOGGING_CONFIG
+    )

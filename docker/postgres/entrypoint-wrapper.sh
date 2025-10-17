@@ -2,4 +2,4 @@
 
 echo "entrypoint-wrapper opened"
 start-cron.sh
-docker-entrypoint.sh postgres
+exec docker-entrypoint.sh postgres -c listen_addresses='*' "$@"
