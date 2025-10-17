@@ -1,0 +1,72 @@
+services:
+  backend-fastapi-postgres:
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${PG_DATABASE_NAME}
+      POSTGRES_USER: ${PG_USER_NAME}
+      POSTGRES_PASSWORD: ${PG_USER_PASSWORD}
+    ports:
+      - "${PG_EXTERNAL_PORT}:${PG_INTERNAL_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups:z
+      - ./docker/postgres/entrypoint-wrapper.sh:/usr/local/bin/entrypoint-wrapper.sh
+      - ./docker/postgres/start-cron.sh:/usr/local/bin/start-cron.sh
+      - ./docker/postgres/after_init:/doceker-entrypoint-initdb.d
+    entrypoint: ["sh", "/usr/local/bin/entrypoint-wrapper.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER_NAME} -d ${PG_DATABASE_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  backend-fastapi:
+    depends_on:
+      backend-fastapi-postgres:
+        condition: service_healthy
+        restart: true
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=development
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    command:
+      sh -c "make migrate && make init-prod-db && make run"
+    volumes:
+      - ./src:/backend-fastapi/src
+      - ./Makefile:/backend-fastapi/Makefile
+      - ./pyproject.toml:/backend-fastapi/pyproject.toml
+    restart: unless-stopped
+
+  smtp-server:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"  # Web UI порт
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+
+volumes:
+  postgres_data:
+  portainer_data:

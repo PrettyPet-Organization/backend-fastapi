@@ -1,0 +1,186 @@
+[project]
+name = "backend-fastapi"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiosmtplib>=4.0.2",
+    "alembic==1.16.2",
+    "annotated-types==0.7.0",
+    "anyio==4.9.0",
+    "asyncpg==0.30.0",
+    "autoflake==2.3.1",
+    "basedpyright==1.29.4",
+    "bcrypt==4.0.1",
+    "click==8.2.1",
+    "colorama==0.4.6",
+    "dnspython==2.7.0",
+    "ecdsa==0.19.1",
+    "email-validator==2.2.0",
+    "fastapi==0.115.13",
+    "greenlet==3.2.3",
+    "h11==0.16.0",
+    "httpx>=0.28.1",
+    "idna==3.10",
+    "mako==1.3.10",
+    "markupsafe==3.0.2",
+    "nodejs-wheel-binaries==22.16.0",
+    "passlib==1.7.4",
+    "psycopg[binary]==3.2.9",
+    "psutil==5.9.8",
+    "pyasn1==0.6.1",
+    "pydantic==2.11.7",
+    "pydantic-core==2.33.2",
+    "pydantic-settings==2.10.0",
+    "pyflakes==3.4.0",
+    "pytest>=8.4.1",
+    "python-dotenv==1.1.0",
+    "python-jose==3.5.0",
+    "python-multipart==0.0.20",
+    "requests>=2.32.4",
+    "rsa==4.9.1",
+    "ruff==0.12.0",
+    "six==1.17.0",
+    "sniffio==1.3.1",
+    "sqlalchemy==2.0.41",
+    "starlette==0.46.2",
+    "str2bool==1.1",
+    "typing-extensions==4.14.0",
+    "typing-inspection==0.4.1",
+    "tzdata==2025.2",
+    "uvicorn==0.34.3",
+]
+
+
+[dependency-groups]
+dev = [
+    "autoflake>=2.3.1",
+    "basedpyright>=1.29.4",
+    "ruff>=0.11.13",
+]
+
+
+[tool.ruff]
+fix = true
+unsafe-fixes = false
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+skip-magic-trailing-comma = true
+indent-style = "space"
+line-ending = "auto"
+
+
+[tool.ruff.lint]
+select = [
+    "ERA",
+    "FAST",
+    "ANN",
+    "S",
+    "B",
+    "BLE",
+    "FBT",
+    "A",
+    "COM",
+    "C4",
+    "DTZ",
+    "EM",
+    "ISC",
+    "ICN",
+    "LOG",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "SLOT",
+    "TID",
+    "TD",
+    "TC",
+    "ARG",
+    "PTH",
+    "FLY",
+    "I",
+    "N",
+    "PERF",
+    "E",
+    "W",
+    "D",
+    "F",
+    "UP",
+    "FURB",
+    "TRY",
+]
+ignore = [
+    "PT011", # Checks for pytest.raises calls without a match parameter.
+
+    "UP038", # Deprecated
+
+    "D10",
+    # - Missing docstring in public module
+    # - Missing docstring in public class
+    # - Missing docstring in public function
+    # - Missing docstring in public package
+    # - Missing docstring in magic method
+    # - Missing docstring in public nested class
+    # - Missing docstring in `__init__`
+
+    "D203",  # 1 blank line required before class docstring
+    "D213",  # Multi-line docstring summary should start at the second line
+
+    "E501",  # Line too long. Need to be ignored for autofix to work
+
+    "COM812",
+]
+
+isort.split-on-trailing-comma = false
+isort.lines-after-imports = 2
+isort.force-wrap-aliases  = false
+isort.combine-as-imports = true
+
+flake8-tidy-imports.banned-api."typing.Optional".msg = "Recomended use X | None instead of Optional. Read PEP604"
+flake8-tidy-imports.banned-api."typing.List".msg = "Use list instead of typing.List (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Dict".msg = "Use dict instead of typing.Dict (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Tuple".msg = "Use tuple instead of typing.Tuple (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Set".msg = "Use set instead of typing.Set (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.FrozenSet".msg = "Use frozenset instead of typing.FrozenSet (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Deque".msg = "Use collections.deque instead of typing.Deque (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.DefaultDict".msg = "Use collections.defaultdict instead of typing.DefaultDict (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.OrderedDict".msg = "Use collections.OrderedDict instead of typing.OrderedDict (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Counter".msg = "Use collections.Counter instead of typing.Counter (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.ChainMap".msg = "Use collections.ChainMap instead of typing.ChainMap (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.AsyncIterator".msg = "Use collections.abc.AsyncIterator instead of typing.AsyncIterator (deprecated in Python 3.10)."
+flake8-tidy-imports.banned-api."typing.AsyncIterable".msg = "Use collections.abc.AsyncIterable instead of typing.AsyncIterable (deprecated in Python 3.10)."
+flake8-tidy-imports.banned-api."typing.Awaitable".msg = "Use collections.abc.Awaitable instead of typing.Awaitable (deprecated in Python 3.10)."
+flake8-tidy-imports.banned-api."typing.Coroutine".msg = "Use collections.abc.Coroutine instead of typing.Coroutine (deprecated in Python 3.10)."
+flake8-tidy-imports.banned-api."typing.Collection".msg = "Use collections.abc.Collection instead of typing.Collection (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Container".msg = "Use collections.abc.Container instead of typing.Container (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Iterable".msg = "Use collections.abc.Iterable instead of typing.Iterable (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Iterator".msg = "Use collections.abc.Iterator instead of typing.Iterator (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Mapping".msg = "Use collections.abc.Mapping instead of typing.Mapping (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.MutableMapping".msg = "Use collections.abc.MutableMapping instead of typing.MutableMapping (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.Sequence".msg = "Use collections.abc.Sequence instead of typing.Sequence (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.MutableSequence".msg = "Use collections.abc.MutableSequence instead of typing.MutableSequence (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.MutableSet".msg = "Use collections.abc.MutableSet instead of typing.MutableSet (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.KeysView".msg = "Use collections.abc.KeysView instead of typing.KeysView (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.ItemsView".msg = "Use collections.abc.ItemsView instead of typing.ItemsView (deprecated in Python 3.9)."
+flake8-tidy-imports.banned-api."typing.ValuesView".msg = "Use collections.abc.ValuesView instead of typing.ValuesView (deprecated in Python 3.9)."
+
+
+[tool.autoflake]
+in_place = true
+recursive = true
+remove_all_unused_imports = true
+
+
+[tool.basedpyright]
+typeCheckingMode = "strict"
+analyzeUnannotatedFunctions = true
+reportMissingTypeStubs = true
+reportGeneralTypeIssues = true
+reportMissingParameterType = true

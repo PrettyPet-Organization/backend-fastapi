@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+
+working_dir="$(dirname "${0}")"
+source "${working_dir}/constants.sh"
+
+cur_date="$(TZ=${TZ} date +'%Y_%m_%dT%H_%M_%S')"
+
+retention_days="${1:-${PG_BACKUPS_RETENTION_DAYS}}"
+
+old_backups="$(find "${BACKUP_DIR_PATH}" -maxdepth 1 -type f -name "${BACKUP_FILE_PREFIX}_*.gz" -mtime +"${retention_days}")"
+old_backups_count="$(echo "${old_backups}" | { grep -c "${BACKUP_FILE_PREFIX}" || true; } )"
+
+if [[ "${old_backups_count}" -gt 0 ]]; then
+    echo "${cur_date} - Found backups older than ${retention_days} days that will be removed:"
+    echo "${old_backups}"
+    find "${BACKUP_DIR_PATH}" -maxdepth 1 -type f -name "${BACKUP_FILE_PREFIX}_*.gz" -mtime +"${retention_days}" -exec rm -f {} \;
+    echo "Old backups were removed!"
+else
+    echo "${cur_date} - No backups older than ${retention_days} days detected."
+fi
