@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import Depends
-from sqlalchemy import ForeignKey, Numeric, String
+from sqlalchemy import ForeignKey, Numeric, String, Date
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import (Base, CreatedAtMixin, UpdatedAtMixin, get_str_field,
@@ -134,13 +135,18 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "users"
 
     email: Mapped[Annotated[str, Depends(get_str_field)]]
+    username: Mapped[Annotated[str, Depends(get_str_field)]]  # новое поле
     password_hash: Mapped[str]
     full_name: Mapped[Annotated[str | None, Depends(get_str_field_nullable)]]
+    profile_photo: Mapped[str | None] = mapped_column(nullable=True)  # путь к файлу
+    resume: Mapped[str | None] = mapped_column(nullable=True)  # путь к файлу резюме
     bio: Mapped[str | None] = mapped_column(nullable=True)
-    preferences: Mapped[str | None] = mapped_column(nullable=True)
-    experience: Mapped[str | None] = mapped_column(nullable=True)
+    hobbies: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=True)  # PostgreSQL
+    main_stack: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=True)  # PostgreSQL
+    birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    city: Mapped[str | None] = mapped_column(nullable=True)
+    wallet_stars: Mapped[int] = mapped_column(default=3)
     level_id: Mapped[int | None] = mapped_column(ForeignKey("levels.id"), nullable=True)
-
     oauth_account: Mapped["OauthAccountsBase"] = relationship(back_populates="user")
     skills: Mapped[list["SkillsBase"]] = relationship(
         secondary="user_skills", back_populates="users"
