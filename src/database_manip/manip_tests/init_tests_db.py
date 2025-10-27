@@ -1,9 +1,14 @@
 from sqlalchemy import insert
 
 from core.models.base import Base
-from core.models.user_models import (ProjectBase, ProjectRolesBase,
-                                     ProjectRoleSkillsAssociation,
-                                     RoleTypesBase, SkillsBase, UsersBase)
+from core.models.user_models import (
+    ProjectBase,
+    ProjectRolesBase,
+    ProjectRoleSkillsAssociation,
+    RoleTypesBase,
+    SkillsBase,
+    UsersBase,
+)
 
 from .config import sync_session, sync_test_engine
 from .raw_data.new_skill_role_assosiation import new_skill_role_connection

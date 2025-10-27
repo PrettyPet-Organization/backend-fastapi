@@ -7,8 +7,13 @@ from sqlalchemy import ForeignKey, Numeric, String, Date
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import (Base, CreatedAtMixin, UpdatedAtMixin, get_str_field,
-                   get_str_field_nullable)
+from .base import (
+    Base,
+    CreatedAtMixin,
+    UpdatedAtMixin,
+    get_str_field,
+    get_str_field_nullable,
+)
 
 
 class OauthAccountsBase(Base):
@@ -141,8 +146,12 @@ class UsersBase(Base, CreatedAtMixin, UpdatedAtMixin):
     profile_photo: Mapped[str | None] = mapped_column(nullable=True)  # путь к файлу
     resume: Mapped[str | None] = mapped_column(nullable=True)  # путь к файлу резюме
     bio: Mapped[str | None] = mapped_column(nullable=True)
-    hobbies: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=True)  # PostgreSQL
-    main_stack: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=True)  # PostgreSQL
+    hobbies: Mapped[List[str]] = mapped_column(
+        ARRAY(String), nullable=True
+    )  # PostgreSQL
+    main_stack: Mapped[List[str]] = mapped_column(
+        ARRAY(String), nullable=True
+    )  # PostgreSQL
     birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     city: Mapped[str | None] = mapped_column(nullable=True)
     wallet_stars: Mapped[int] = mapped_column(default=3)

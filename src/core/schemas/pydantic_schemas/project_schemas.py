@@ -1,7 +1,11 @@
 from core.schemas.base import CamelBaseModel
 from core.schemas.pydantic_schemas.extended_mixins import BasicRoleTemplate
 from core.schemas.pydantic_schemas.pydantic_mixins import (  # RolesWithResponsesMixin,
-    DecimalProjectMixin, IdMixin, ProjectEssentialsMixin, RoleEssentialsMixin)
+    DecimalProjectMixin,
+    IdMixin,
+    ProjectEssentialsMixin,
+    RoleEssentialsMixin,
+)
 
 from .response_schemas import ApplicationResponseTemplate
 

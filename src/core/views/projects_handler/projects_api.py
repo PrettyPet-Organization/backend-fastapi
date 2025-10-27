@@ -2,8 +2,7 @@ import logging
 import os
 from typing import Annotated
 
-from fastapi import (APIRouter, Depends, HTTPException, Path, Query, Response,
-                     Security)
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, Security
 from fastapi.responses import JSONResponse
 from sqlalchemy import delete, desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +12,10 @@ from core.dependencies.auth import get_current_user, get_db
 from core.models.user_models import ProjectBase, ProjectRolesBase, UsersBase
 from core.schemas.pydantic_schemas.pagination import PaginationTemplate
 from core.schemas.pydantic_schemas.project_schemas import (
-    BasicProjectTemplate, ProjectTemplateShort, ProjectTemplateWithRoles)
+    BasicProjectTemplate,
+    ProjectTemplateShort,
+    ProjectTemplateWithRoles,
+)
 from core.static_data.new_project_body import new_project_mail_body
 from core.static_data.new_project_subject import new_project_mail_subject
 from core.utils.pagination_mixin import pagination_mixin

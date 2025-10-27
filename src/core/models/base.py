@@ -32,22 +32,7 @@ class Base(DeclarativeBase, IntPkMixin):
 def get_str_field(
     length: int | None = 256, collation: str | None = None
 ) -> MappedColumn[String]:
-    """Generate SQLAlchemy `mapped_column` for string fields.
-
-    Need to avoid repetitive `mapped_column(String(256))` in models.
-
-    Usage:
-    ```
-    from typing import Annotated
-
-    from fastapi import Depends
-    from sqlalchemy import String
-    from sqlalchemy.orm import Mapped, mapped_column
-
-    class SomeModel:
-        some_str_field: Mapped[Annotated[str, Depends(get_str_field)]].
-    ```.
-    """
+    """Generate SQLAlchemy `mapped_column` for string fields."""
     return mapped_column(String(length=length, collation=collation))
 
 

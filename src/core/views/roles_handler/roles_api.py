@@ -7,10 +7,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from core.dependencies.auth import get_current_user, get_db
-from core.models.user_models import (ProjectBase, ProjectRolesBase,
-                                     RoleTypesBase, UsersBase)
+from core.models.user_models import (
+    ProjectBase,
+    ProjectRolesBase,
+    RoleTypesBase,
+    UsersBase,
+)
 from core.schemas.pydantic_schemas.role_schemas import (
-    RoleExtendedOutputTemplate, RoleInputTemplate, RoleOutputTemplate)
+    RoleExtendedOutputTemplate,
+    RoleInputTemplate,
+    RoleOutputTemplate,
+)
 
 roles_router = APIRouter(prefix="/api/v1")
 

@@ -3,8 +3,7 @@ from pydantic import Field
 from core.schemas.base import CamelBaseModel
 
 from .extended_mixins import BasicLevelTemplate, BasicSkillsTemplate
-from .pydantic_mixins import (BasicUserDataMixin, DateTimeMixin, EmailMixin,
-                              IdMixin)
+from .pydantic_mixins import BasicUserDataMixin, DateTimeMixin, EmailMixin, IdMixin
 
 
 class UserOutputTrimmedTemplate(

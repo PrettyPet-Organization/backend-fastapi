@@ -1,9 +1,15 @@
 from core.schemas.base import CamelBaseModel
 
 from .extended_mixins import BasicRoleTemplate
-from .pydantic_mixins import (BasicUserDataMixin, DateTimeMixin,
-                              DecimalProjectMixin, EmailMixin, IdMixin,
-                              ProjectEssentialsMixin, RoleEssentialsMixin)
+from .pydantic_mixins import (
+    BasicUserDataMixin,
+    DateTimeMixin,
+    DecimalProjectMixin,
+    EmailMixin,
+    IdMixin,
+    ProjectEssentialsMixin,
+    RoleEssentialsMixin,
+)
 
 
 class RoleOutputTemplate(RoleEssentialsMixin, IdMixin, CamelBaseModel):

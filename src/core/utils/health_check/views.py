@@ -21,7 +21,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict:
         "timestamp": datetime.now().isoformat(),
         "version": "1.0.0",
         "dependencies": {},
-        "system": {}
+        "system": {},
     }
 
     # 1. Проверка базы данных через асинхронную сессию
@@ -35,7 +35,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict:
             "status": "connected",
             "connection_time_ms": round(db_connection_time, 2),
             "type": "PostgreSQL",
-            "driver": "asyncpg"  # теперь используем asyncpg через SQLAlchemy
+            "driver": "asyncpg",  # теперь используем asyncpg через SQLAlchemy
         }
 
         if test_value != 1:
@@ -45,7 +45,7 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict:
         health_status["status"] = "unhealthy"
         health_status["dependencies"]["database"] = {
             "status": "disconnected",
-            "error": str(e)
+            "error": str(e),
         }
 
     # 2. Системная информация
@@ -55,13 +55,10 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> dict:
         "environment": os.getenv("ENVIRONMENT", "development"),
         "cpu_usage": psutil.cpu_percent(interval=1),
         "memory_usage": psutil.virtual_memory().percent,
-        "disk_usage": psutil.disk_usage('/').percent
+        "disk_usage": psutil.disk_usage("/").percent,
     }
 
     # 3. Информация о приложении
-    health_status["dependencies"]["api"] = {
-        "status": "healthy",
-        "framework": "FastAPI"
-    }
+    health_status["dependencies"]["api"] = {"status": "healthy", "framework": "FastAPI"}
 
     return health_status

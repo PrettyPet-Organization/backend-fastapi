@@ -7,9 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from core.dependencies.auth import get_current_user, get_db
-from core.models.user_models import (ProjectRolesBase,
-                                     ProjectRoleSkillsAssociation, SkillsBase,
-                                     UsersBase)
+from core.models.user_models import (
+    ProjectRolesBase,
+    ProjectRoleSkillsAssociation,
+    SkillsBase,
+    UsersBase,
+)
 
 skills_router = APIRouter(prefix="/api/v1")
 

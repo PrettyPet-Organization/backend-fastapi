@@ -8,10 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.config.db import get_db
 from core.dependencies.auth import get_current_user
 from core.models.user_models import UserRolesAssociation, UsersBase
-from core.schemas.pydantic_schemas.response_schemas import (ErrorResponse,
-                                                            TokenResponse)
-from core.schemas.pydantic_schemas.user_schemas import \
-    UserOutputTrimmedTemplate
+from core.schemas.pydantic_schemas.response_schemas import ErrorResponse, TokenResponse
+from core.schemas.pydantic_schemas.user_schemas import UserOutputTrimmedTemplate
 from core.schemas.user import UserCreate, UserLogin, UserRead
 from core.utils.jwt import create_access_token
 from core.utils.security import hash_password, verify_password

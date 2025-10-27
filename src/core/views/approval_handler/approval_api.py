@@ -7,14 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from core.dependencies.auth import get_current_user, get_db
-from core.models.user_models import (ProjectBase, ProjectRoleResponseBase,
-                                     ProjectRolesBase,
-                                     ProjectRoleUsersAssociation, UsersBase)
+from core.models.user_models import (
+    ProjectBase,
+    ProjectRoleResponseBase,
+    ProjectRolesBase,
+    ProjectRoleUsersAssociation,
+    UsersBase,
+)
 from core.schemas.pydantic_schemas.action_schemas import ActionTemplate
-from core.schemas.pydantic_schemas.project_schemas import \
-    ProjectRolesResponsesTemplate
-from core.schemas.pydantic_schemas.response_schemas import \
-    ApplicationResponseTemplate
+from core.schemas.pydantic_schemas.project_schemas import ProjectRolesResponsesTemplate
+from core.schemas.pydantic_schemas.response_schemas import ApplicationResponseTemplate
 
 approval_router = APIRouter(prefix="/api/v1")
 
