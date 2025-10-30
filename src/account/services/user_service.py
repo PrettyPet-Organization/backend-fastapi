@@ -2,10 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
 
-from ..models.user_models import User, UserProfile
-from ..schemas import UserCreate
-from ..auth.utils import hash_password
-from .file_service import FileService
+from account.models.user_models import User, UserProfile
+from account.schemas.base import UserCreate
+from account.utils.models_utils import hash_password
+from account.services.file_service import FileService
 
 
 class UserService:

@@ -5,8 +5,8 @@ from sqlalchemy import ForeignKey, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .mixins import Base, TimestampMixin
-from src.account.utils.models_utils import get_str_field
+from account.models.mixins import Base, TimestampMixin
+from account.utils.models_utils import get_str_field
 
 
 class User(

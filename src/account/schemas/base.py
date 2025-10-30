@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 from typing import List, Optional, Annotated
 from pydantic import (
     BaseModel,
@@ -6,7 +6,6 @@ from pydantic import (
     field_validator,
     ConfigDict,
     Field,
-    model_validator,
 )
 import re
 from datetime import date as date_type
@@ -26,17 +25,6 @@ class UserProfileCreate(BaseModel):
     hobbies: Optional[List[str]] = Field(None, description="Список увлечений")
     birth_date: Optional[date_type] = Field(None, description="Дата рождения")
     city: Optional[str] = Field(None, description="Город проживания")
-
-    @field_validator("username")
-    @classmethod
-    def validate_username(cls, v: str) -> str:
-        if not re.match(r"^[a-zA-Z0-9_]{3,50}$", v):
-            raise ValueError(
-                "Username must be 3-50 characters long and contain only letters, numbers and underscores"
-            )
-        if v.lower() in ["admin", "root", "system", "moderator"]:
-            raise ValueError("This username is not allowed")
-        return v
 
     @field_validator("main_stack", "hobbies")
     @classmethod
@@ -124,6 +112,7 @@ class UserProfileResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
@@ -143,5 +132,6 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+
 
 UserResponse.model_rebuild()

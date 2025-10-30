@@ -1,127 +1,104 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database import get_db
-from ..schemas import UserCreate, UserResponse, UserLogin, LoginResponse
-from ..services.auth_service import AuthService
-from ..config import settings
+from core.config import settings
+from core.config.db import get_db
+from account.schemas.base import UserLogin, LoginResponse
+from account.services.auth_service import AuthService
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter()
 
 
 @router.post(
     "/login",
     response_model=LoginResponse,
-    summary="User login",
-    description="Authenticate user and return JWT token"
+    summary="🔐 User Login",
+    description="""
+    Authenticate user and generate JWT access token.
+
+    After successful login, use the returned token in the Authorization header:
+    `Authorization: Bearer <your_token>`
+
+    The token is valid for 30 minutes by default.
+    """,
+    responses={
+        200: {
+            "description": "✅ Successfully authenticated",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "access_token": "eyJhbGciOiJIUzI1NiIs...",
+                        "token_type": "bearer",
+                        "user": {
+                            "id": 1,
+                            "email": "user@example.com",
+                            "username": "john_doe",
+                            "wallet_stars": 3,
+                        },
+                    }
+                }
+            },
+        },
+        401: {
+            "description": "❌ Authentication failed",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Incorrect email or password"}
+                }
+            },
+        },
+    },
 )
 async def login(
-        form_data: UserLogin,
-        db: AsyncSession = Depends(get_db)
+    login_data: UserLogin, db: AsyncSession = Depends(get_db)
 ) -> LoginResponse:
     """
-    User login with email and password.
+    Authenticate user credentials and return JWT token.
 
-    Returns JWT access token that should be included in Authorization header
-    for protected endpoints: `Authorization: Bearer {token}`
+    - **email**: Registered email address
+    - **password**: User password
+
+    Returns access token for authorized API requests.
+    Include this token in the Authorization header for protected endpoints.
     """
     auth_service = AuthService(db)
 
-    user = await auth_service.authenticate_user(form_data.email, form_data.password)
+    user = await auth_service.authenticate_user(login_data.email, login_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth_service.create_access_token(
-        data={"sub": user.username},
-        expires_delta=access_token_expires
+        data={"sub": user.username}, expires_delta=access_token_expires
     )
 
-    return LoginResponse(
-        access_token=access_token,
-        token_type="bearer",
-        user=UserResponse.model_validate(user)
-    )
-
-
-@router.post(
-    "/token",
-    response_model=LoginResponse,
-    include_in_schema=False
-)
-async def login_for_access_token(
-        form_data: OAuth2PasswordRequestForm = Depends(),
-        db: AsyncSession = Depends(get_db)
-) -> LoginResponse:
-    """
-    OAuth2 compatible token login, get an access token for future requests
-    """
-    auth_service = AuthService(db)
-
-    user = await auth_service.authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth_service.create_access_token(
-        data={"sub": user.username},
-        expires_delta=access_token_expires
-    )
-
-    return LoginResponse(
-        access_token=access_token,
-        token_type="bearer",
-        user=UserResponse.model_validate(user)
-    )
-
-
-@router.get(
-    "/me",
-    response_model=UserResponse,
-    summary="Get current user",
-    description="Get current authenticated user information"
-)
-async def read_users_me(
-        current_user: User = Depends(get_current_active_user)
-) -> UserResponse:
-    """Get current authenticated user."""
-    return UserResponse.model_validate(current_user)
+    return LoginResponse(access_token=access_token, token_type="bearer", user=user)
 
 
 @router.post(
     "/refresh",
-    response_model=LoginResponse,
-    summary="Refresh access token",
-    description="Refresh expired access token (требует реализации refresh токенов)"
+    summary="🔄 Refresh Token",
+    description="Refresh expired access token (implementation pending)",
+    responses={
+        200: {
+            "description": "✅ Token refresh endpoint",
+            "content": {
+                "application/json": {
+                    "example": {"message": "Token refresh endpoint - to be implemented"}
+                }
+            },
+        }
+    },
 )
-async def refresh_token(
-        current_user: User = Depends(get_current_active_user),
-        db: AsyncSession = Depends(get_db)
-) -> LoginResponse:
+async def refresh_token():
     """
-    Refresh access token.
-    В будущем можно добавить систему refresh токенов.
+    Refresh JWT access token.
+
+    *This endpoint is planned for future implementation*
+    Will allow refreshing expired tokens without re-authentication.
     """
-    auth_service = AuthService(db)
-
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth_service.create_access_token(
-        data={"sub": current_user.username},
-        expires_delta=access_token_expires
-    )
-
-    return LoginResponse(
-        access_token=access_token,
-        token_type="bearer",
-        user=UserResponse.model_validate(current_user)
-    )
+    return {"message": "Token refresh endpoint - to be implemented"}
